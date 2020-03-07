@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/pages/ce_shi.dart';
+import 'package:flutter_app/pages/chat_page.dart';
 import 'package:flutter_app/pages/forum_information_page.dart';
 import 'package:flutter_app/pages/home_page.dart';
 import 'package:flutter_app/pages/index_page.dart';
@@ -24,6 +25,7 @@ class RouteName{
   static const uploadPage='/uploadPage';
   static const uploadPageOk='/uploadPageOk';
 
+  static const chatPage='/chatPage';
 
   static const ceshi='/ceshi';
 
@@ -31,9 +33,6 @@ class RouteName{
   static const b='/b';
   static const c='/c';
   static const forumInformationPage='/forumInformationPage';
-
-
-
 
 
 }
@@ -58,6 +57,8 @@ class AppRoute{
         return DefaultRoute(child: TradeInformationPage(settings.arguments));
       case RouteName.smsLogin:
         return DefaultRoute(child: SmsLogin());
+      case RouteName.chatPage:
+        return DefaultRoute(child: ChatPage(settings.arguments));
       case RouteName.uploadPage:
         return DefaultRoute(child: UploadPage());
       case RouteName.smsLogin:
@@ -73,7 +74,6 @@ class AppRoute{
       case RouteName.c:
         return DefaultRoute(child: C());
       case RouteName.forumInformationPage:
-        print('index:${settings.arguments}');
         return DefaultRoute(child: ForumInformationPage(index: settings.arguments,));
       default:
         return PageRouteBuilder(pageBuilder: (context,animation,_) =>Container());

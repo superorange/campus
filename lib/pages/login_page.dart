@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/model/base_model.dart';
 import 'package:flutter_app/pages/vm/pwd_login_vm.dart';
 import 'package:flutter_app/pages/vm/sms_login_vm.dart';
@@ -363,7 +364,9 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin{
 
                         BaseModel model=BaseModel.fromJson(val.data);
                         if(model.code==200){
-                          LoginAuth().saveToken(model.token);
+//                          LoginAuth().saveToken(model.token);
+                          Api.token=model.token;
+                          Api.userId=val.data['data']['userId'];
                           Navigator.pushNamedAndRemoveUntil(context, RouteName.index, ModalRoute.withName('/'));
                         }
                         else{

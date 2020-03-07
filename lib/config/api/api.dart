@@ -2,7 +2,8 @@ class Api{
   //api构建
 //  static const baseUrl = 'http://api.ifree.top:8899';
   static const baseUrl = 'http://127.0.0.1:100';
-
+  static const socketUrl = 'ws://127.0.0.1:100';
+  static const chat = '/chat';
   //user api    >>>post
   static const login = '/user/login';
   static const register = '/user/register';
@@ -50,7 +51,8 @@ class Api{
   static const  forumArticleUpdate= '/form/article/update';  //put
   static const  forumArticleSearch= '/form/article/search';  //get
 
-
+  static String token ='';
+  static String userId = '';
 
 
 

@@ -9,7 +9,7 @@ import 'package:flutter_app/utils/login_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'forum_page.dart';
-import 'message_page.dart';
+import 'chatters_page.dart';
 class IndexPage extends StatefulWidget {
   @override
   _IndexPageState createState() => _IndexPageState();
@@ -22,7 +22,7 @@ class _IndexPageState extends State<IndexPage> with AutomaticKeepAliveClientMixi
 //    ForumPage(),
     TradeSearchPage(),
 //  UploadPage(),
-    MessagePage(),
+    ChattersPage(),
     PersonPage(),
   ];
   @override

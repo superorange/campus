@@ -20,6 +20,7 @@ class _TradeSearchPageState extends State<TradeSearchPage> {
   EasyRefreshController _controller=EasyRefreshController();
   TradeListPageVm tradeListPageVm=TradeListPageVm();
   FocusNode _focusNode = FocusNode();
+
   bool first = true;
   @override
   void initState() {
@@ -42,7 +43,6 @@ class _TradeSearchPageState extends State<TradeSearchPage> {
         body: SafeArea(
             child: Consumer<TradeListPageVm>(builder: (context,vm,_){
               if(vm.goodsListModel==null&&first){
-                print('刷新——++');
                 first=false;
                 vm.loading();
               }

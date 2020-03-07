@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       title: 'Campus',
       onGenerateRoute: AppRoute.generateRoute,
-      initialRoute: RouteName.index,
+      initialRoute: RouteName.login,
     ));
   }
 }
