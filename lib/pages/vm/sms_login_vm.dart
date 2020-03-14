@@ -70,7 +70,10 @@ class SmsLoginVm with ChangeNotifier{
   }
   @override
   void dispose() {
-    _timer.cancel();
+    if(_timer?.isActive??false){
+      _timer.cancel();
+    }
+
     super.dispose();
   }
 

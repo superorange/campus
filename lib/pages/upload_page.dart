@@ -1,18 +1,16 @@
 import 'dart:async';
+
 import 'package:connectivity/connectivity.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_app/model/base_model.dart';
 import 'package:flutter_app/routes/routes.dart';
-import 'package:flutter_app/service/mi_ma.dart';
-import 'package:flutter_app/service/upload_service.dart';
-import 'package:flutter_app/utils/jiami.dart';
+import 'package:flutter_app/service/goods_service.dart';
+import 'package:flutter_app/utils/base_utils.dart';
 import 'package:flutter_app/utils/screen_config.dart';
-import 'package:flutter_app/utils/utils.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:oktoast/oktoast.dart';
-
 
 typedef UploadProgress = void Function(int c, double p);
 typedef UploadResult = void Function(Response response);
@@ -36,10 +34,12 @@ class _UploadPageState extends State<UploadPage> {
   FocusNode _gPriFocus = FocusNode();
   List<Asset> images = [];
   bool net = true;
-  int mainPicIndex=0;
-  List<bool> showMainHint = List.generate(9, (_)=>true);
-  void resetMainHint(){
-    showMainHint = List.generate(9, (_)=>true);
+  int mainPicIndex = 0;
+  List<bool> showMainHint = List.generate(9, (_) => true);
+  StreamSubscription _netSubscription;
+  ConnectivityResult _connectivityResult;
+  void resetMainHint() {
+    showMainHint = List.generate(9, (_) => true);
   }
 
   Widget addWidget() {
@@ -60,35 +60,46 @@ class _UploadPageState extends State<UploadPage> {
         decoration: BoxDecoration(
             color: Colors.blueAccent, borderRadius: BorderRadius.circular(7)),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                '+ 选取图片',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-              ),
-              Text(
-                '长按图片切换主图',
-                style: TextStyle(color: Colors.black,fontSize: 10),
-              ),
-            ],
-          )
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              '+ 选取图片',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+            ),
+            Text(
+              '长按图片切换主图',
+              style: TextStyle(color: Colors.black, fontSize: 10),
+            ),
+          ],
+        )),
       ),
     );
   }
+
   @override
   void initState() {
-    showMainHint.first=false;
-    NetUtils().netController.stream.listen((data){
-      if(data==ConnectivityResult.none){
-        net=false;
-      }
-      else{
-        net=true;
-      }
-    });
+    showMainHint.first = false;
+    _netSubscription = Connectivity().onConnectivityChanged.listen((r) {
+      _connectivityResult = r;
+    }, cancelOnError: true);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (_gNameFocus.hasFocus) {
+      _gNameFocus.unfocus();
+    }
+    if (_gPriFocus.hasFocus) {
+      _gPriFocus.unfocus();
+    }
+    if (_gDecFocus.hasFocus) {
+      _gDecFocus.unfocus();
+    }
+    _netSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -102,885 +113,1273 @@ class _UploadPageState extends State<UploadPage> {
       ),
       body: SafeArea(
           child: Padding(
-              padding: EdgeInsets.only(left: 20, right: 20),
-              child:  ListView(
+        padding: EdgeInsets.only(left: 20, right: 20),
+        child: ListView(
+          children: <Widget>[
+            TextField(
+              controller: _gName,
+              focusNode: _gNameFocus,
+              maxLines: 1,
+              decoration: InputDecoration(hintText: '输入商品名 (至少2字)'),
+            ),
+            TextField(
+              controller: _gDec,
+              focusNode: _gDecFocus,
+              maxLines: 6,
+              decoration: InputDecoration(hintText: '输入详情 (至少10字)'),
+            ),
+            SizedBox(
+              height: setHeight(10),
+            ),
+            Container(
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisSpacing: 3, mainAxisSpacing: 3, crossAxisCount: 3),
+                itemBuilder: (context, index) {
+                  if (images.length == 0) {
+                    return addWidget();
+                  }
+                  if (index == images.length && images.length < 9) {
+                    return addWidget();
+                  }
+                  return Container(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        GestureDetector(
+                          onLongPress: () {
+                            mainPicIndex = index;
+                            resetMainHint();
+                            showMainHint[index] = false;
+                            setState(() {});
+                          },
+                          child: AssetThumb(
+                            asset: images[index],
+                            width: setWidth(220).round(),
+                            height: setHeight(200).round(),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment(0.9, -1),
+                          child: InkWell(
+                            onTap: () {
+                              mainPicIndex = 0;
+                              resetMainHint();
+                              showMainHint.first = false;
+                              images.removeAt(index);
+                              setState(() {});
+                            },
+                            child: Container(
+                              height: 20,
+                              width: 20,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.yellowAccent.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(36)),
+                              child: Text('X'),
+                            ),
+                          ),
+                        ),
+                        Offstage(
+                          offstage: showMainHint[index],
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[300].withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(3)),
+                              child: Text(
+                                ' 主图 ',
+                                style: TextStyle(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                itemCount:
+                    images.length < 9 ? images.length + 1 : images.length,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Choose Location:',
+              style: TextStyle(
+                  color: (c2 || c3 || c4 || c1)
+                      ? Colors.blueAccent
+                      : Colors.black54,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22),
+            ),
+            Container(
+              height: 40,
+              margin: EdgeInsets.only(top: 10, bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  TextField(
-                    controller: _gName,
-                    focusNode: _gNameFocus,
-                    maxLines: 1,
-                    decoration: InputDecoration(hintText: '输入商品名 (至少2字)'),
-                  ),
-                  TextField(
-                    controller: _gDec,
-                    focusNode: _gDecFocus,
-                    maxLines: 6,
-                    decoration: InputDecoration(hintText: '输入详情 (至少10字)'),
-                  ),
-                  SizedBox(
-                    height: setHeight(10),
-                  ),
-                  Container(
-                    child: GridView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisSpacing:3,
-                          mainAxisSpacing: 3,
-                          crossAxisCount: 3),
-                      itemBuilder: (context, index) {
-                        if (images.length == 0) {
-                          return addWidget();
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        c2 = c3 = c4 = false;
+                        c1 = !c1;
+                        if (c1) {
+                          schoolLocation = '宜宾校区';
                         }
-                        if (index == images.length && images.length < 9) {
-                          return addWidget();
-                        }
-                        return Container(
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: <Widget>[
-                              GestureDetector(
-                                onLongPress: (){
-                                  mainPicIndex=index;
-                                  resetMainHint();
-                                  showMainHint[index]=false;
-                                  setState(() {
 
-                                  });
-                                },
-                                child: AssetThumb(
-                                  asset: images[index],
-                                  width: setWidth(220).round(),
-                                  height: setHeight(200).round(),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment(0.9, -1),
-                                child: InkWell(
-                                  onTap: () {
-                                    mainPicIndex=0;
-                                    resetMainHint();
-                                    showMainHint.first=false;
-                                    images.removeAt(index);
-                                    setState(() {});
-                                  },
-                                  child: Container(
-                                    height: 20,
-                                    width: 20,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        color: Colors.yellowAccent
-                                            .withOpacity(0.8),
-                                        borderRadius:
-                                        BorderRadius.circular(36)),
-                                    child: Text('X'),
-                                  ),
-                                ),
-                              ),
-                              Offstage(
-                                offstage: showMainHint[index],
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey[300].withOpacity(0.7),
-                                        borderRadius: BorderRadius.circular(3)
-                                    ),
-                                    child: Text(' 主图 ',style: TextStyle(
-
-                                    ),),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                        setState(() {});
                       },
-                      itemCount: images.length < 9
-                          ? images.length + 1
-                          : images.length,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    'Choose Location:',
-                    style: TextStyle(
-                        color: (c2 || c3 || c4 || c1)
-                            ? Colors.blueAccent
-                            : Colors.black54,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22),
-                  ),
-                  Container(
-                    height: setHeight(50),
-                    margin: EdgeInsets.only(top: 10, bottom: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              c2 = c3 = c4 = false;
-                              c1 = !c1;
-                              if (c1) {
-                                schoolLocation = '宜宾校区';
-                              }
-
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: c1
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '宜宾校区',
-                                style: TextStyle(
-                                    color: c1
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: c1 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '宜宾校区',
+                          style: TextStyle(
+                              color: c1 ? Colors.white : Colors.grey[300]),
                         ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              c1 = c3 = c4 = false;
-                              c2 = !c2;
-                              if (c2) {
-                                schoolLocation = '汇南校区';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: c2
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '汇南校区',
-                                style: TextStyle(
-                                    color: c2
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              c2 = c1 = c4 = false;
-                              c3 = !c3;
-                              if (c3) {
-                                schoolLocation = '营盘校区';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: c3
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '营盘校区',
-                                style: TextStyle(
-                                    color: c3
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              c2 = c3 = c1 = false;
-                              c4 = !c4;
-                              if (c4) {
-                                schoolLocation = '其它';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: c4
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '其它',
-                                style: TextStyle(
-                                    color: c4
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    'Choose Category:',
-                    style: TextStyle(
-                        color: (l2 || l3 || l4 || l1)
-                            ? Colors.blueAccent
-                            : Colors.black54,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22),
-                  ),
-                  Container(
-                    height: setHeight(50),
-                    margin: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              l2 = l3 = l4 = false;
-                              l1 = !l1;
-                              if (l1) {
-                                category = '数码产品';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: l1
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '数码产品',
-                                style: TextStyle(
-                                    color: l1
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              l1 = l3 = l4 = false;
-                              l2 = !l2;
-                              if (l2) {
-                                category = '考研资料';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: l2
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '考研资料',
-                                style: TextStyle(
-                                    color: l2
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              l2 = l1 = l4 = false;
-                              l3 = !l3;
-                              if (l3) {
-                                category = '二手书籍';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: l3
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '二手书籍',
-                                style: TextStyle(
-                                    color: l3
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Flexible(
-                          child: InkWell(
-                            onTap: () {
-                              l2 = l3 = l1 = false;
-                              l4 = !l4;
-                              if (l4) {
-                                category = '其它';
-                              }
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(right: 10),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: l4
-                                      ? Colors.blueAccent
-                                      : Colors.black54,
-                                  borderRadius: BorderRadius.circular(7)),
-                              width: double.infinity,
-                              height: double.infinity,
-                              child: Text(
-                                '其它',
-                                style: TextStyle(
-                                    color: l4
-                                        ? Colors.white
-                                        : Colors.grey[300]),
-                              ),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        'Price:',
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22),
                       ),
-                      Container(
-                        width: setWidth(300),
-                        child: TextField(
-                            controller: _gPri,
-                            focusNode: _gPriFocus,
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                            ),
-                            decoration: InputDecoration(
-                                hintText: '¥: 9.99',
-                                border: InputBorder.none)),
+                    ),
+                    flex: 1,
+                  ),
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        c1 = c3 = c4 = false;
+                        c2 = !c2;
+                        if (c2) {
+                          schoolLocation = '汇南校区';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: c2 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '汇南校区',
+                          style: TextStyle(
+                              color: c2 ? Colors.white : Colors.grey[300]),
+                        ),
                       ),
-                    ],
+                    ),
+                    flex: 1,
                   ),
-                  SizedBox(
-                    height: 30,
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        c2 = c1 = c4 = false;
+                        c3 = !c3;
+                        if (c3) {
+                          schoolLocation = '营盘校区';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: c3 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '营盘校区',
+                          style: TextStyle(
+                              color: c3 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
                   ),
-                  FlatButton(
-
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7)),
-                    onPressed: () async {
-                      var _price;
-                      if (!(l1 || l2 || l3 || l4)) {
-                        showToast('请选择分类', position: ToastPosition.bottom);
-                        return;
-                      }
-                      if (!(c1 || c2 || c3 || c4)) {
-                        showToast('请选择位置', position: ToastPosition.bottom);
-                        return;
-                      }
-                      try {
-                        _price = double.parse(_gPri.text).floor();
-                      } catch (e) {
-                        showToast('价格错误', position: ToastPosition.bottom);
-                        return;
-                      }
-                      if (_gName.text.length <= 2 ||
-                          _gDec.text.length <= 10) {
-                        showToast('详情/商品名 太少啦，再多说点吧',
-                            position: ToastPosition.bottom);
-                        return;
-                      }
-                      if (images.length == 0) {
-                        showToast('来张图片吧');
-                        return;
-                      }
-
-                      showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) {
-                            int onlyOne = 0;
-                            int totalSize = 0;
-                            bool isGetToken = false;
-                            bool isJiMi = false;
-                            int currentIndex = 1;
-                            double currentProgress = 0.1;
-                            List<String> imagesList = [];
-
-                            return StatefulBuilder(
-                              builder: (context, newSet) {
-                                if (onlyOne == 0) {
-                                  MiMaService().getImageToken().then(
-                                          (val) async {
-                                        BaseModel model =
-                                        BaseModel.fromJson(val.data);
-                                        if (model.code == 200) {
-                                          isGetToken = true;
-                                          if (mounted) {
-                                            newSet(() {});
-                                          }
-                                          var ak = await JiaMi.jm(model.token);
-                                          isJiMi = true;
-                                          if (mounted) {
-                                            newSet(() {});
-                                          }
-                                          QiNiu().uploadImages(images, '$ak:${model.msg}',
-                                              uploadResult: (t) async {
-                                                imagesList.add(t.data['hash']);
-                                                if (imagesList.length ==
-                                                    images.length) {
-
-                                                  var data = {
-                                                    "gPrice": _price,
-                                                    "gName": _gName.text,
-                                                    "gDec": _gDec.text,
-                                                    "gImages": imagesList,
-                                                    "gStar": 0,
-                                                    "schoolLocation": schoolLocation,
-                                                    "category": category,
-                                                    "mainPic":imagesList[mainPicIndex]
-                                                  };
-                                                  var result = await UploadService()
-                                                      .uploadImages(data);
-                                                  if(result.data['code']==200){
-                                                    Navigator.pushReplacementNamed(
-                                                      context,
-                                                      RouteName.uploadPageOk,);
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        c2 = c3 = c1 = false;
+                        c4 = !c4;
+                        if (c4) {
+                          schoolLocation = '其它';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: c4 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '其它',
+                          style: TextStyle(
+                              color: c4 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'Choose Category:',
+              style: TextStyle(
+                  color: (l2 || l3 || l4 || l1)
+                      ? Colors.blueAccent
+                      : Colors.black54,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22),
+            ),
+            Container(
+              height: 40,
+              margin: EdgeInsets.only(top: 10, bottom: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        l2 = l3 = l4 = false;
+                        l1 = !l1;
+                        if (l1) {
+                          category = '数码产品';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: l1 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '数码产品',
+                          style: TextStyle(
+                              color: l1 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        l1 = l3 = l4 = false;
+                        l2 = !l2;
+                        if (l2) {
+                          category = '考研资料';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: l2 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '考研资料',
+                          style: TextStyle(
+                              color: l2 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        l2 = l1 = l4 = false;
+                        l3 = !l3;
+                        if (l3) {
+                          category = '二手书籍';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: l3 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '二手书籍',
+                          style: TextStyle(
+                              color: l3 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                  Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        l2 = l3 = l1 = false;
+                        l4 = !l4;
+                        if (l4) {
+                          category = '其它';
+                        }
+                        setState(() {});
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: l4 ? Colors.blueAccent : Colors.black54,
+                            borderRadius: BorderRadius.circular(7)),
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Text(
+                          '其它',
+                          style: TextStyle(
+                              color: l4 ? Colors.white : Colors.grey[300]),
+                        ),
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Price:',
+                  style: TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22),
+                ),
+                Container(
+                  width: setWidth(300),
+                  child: TextField(
+                      keyboardType: TextInputType.phone,
+                      controller: _gPri,
+                      focusNode: _gPriFocus,
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                      ),
+                      decoration: InputDecoration(
+                          hintText: '¥: 9.99', border: InputBorder.none)),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            FlatButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(7)),
+              onPressed: () async {
+                var _price;
+                if (!(l1 || l2 || l3 || l4)) {
+                  showToast('请选择分类', position: ToastPosition.bottom);
+                  return;
+                }
+                if (!(c1 || c2 || c3 || c4)) {
+                  showToast('请选择位置', position: ToastPosition.bottom);
+                  return;
+                }
+                try {
+                  _price = double.parse(_gPri.text).floor();
+                } catch (e) {
+                  showToast('价格错误', position: ToastPosition.bottom);
+                  return;
+                }
+                if (_gName.text.length <= 2 || _gDec.text.length <= 10) {
+                  showToast('详情/商品名 太少啦，再多说点吧', position: ToastPosition.bottom);
+                  return;
+                }
+                if (images.length == 0) {
+                  showToast('来张图片吧');
+                  return;
+                }
+                if (_connectivityResult == ConnectivityResult.none) {
+                  showToast('网络似乎有问题呢！');
+                  return;
+                }
+                print(_connectivityResult);
+                if (_connectivityResult != ConnectivityResult.mobile) {
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) {
+                        return CupertinoAlertDialog(
+                          title: Text('提示'),
+                          content: Text('当前处于移动网络，可能花费大量流量，确定上传吗？'),
+                          actions: <Widget>[
+                            FlatButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('取消')),
+                            FlatButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (context) {
+                                        int onlyOne = 0;
+                                        int totalSize = 0;
+                                        bool isGetToken = false;
+                                        bool isJiMi = false;
+                                        int currentIndex = 1;
+                                        double currentProgress = 0.1;
+                                        List<String> imagesList = [];
+                                        return StatefulBuilder(
+                                          builder: (context, newSet) {
+                                            if (onlyOne == 0) {
+                                              GoodsService()
+                                                  .getImageToken()
+                                                  .then((val) async {
+                                                BaseModel model =
+                                                    BaseModel.fromJson(
+                                                        val.data);
+                                                if (model.code == 200) {
+                                                  isGetToken = true;
+                                                  if (mounted) {
+                                                    newSet(() {});
                                                   }
-                                                  else{
-                                                    showToast('上传失败');
-                                                    Navigator.pop(context);
+                                                  var ak = await JiaMi.jm(
+                                                      model.token);
+                                                  isJiMi = true;
+                                                  if (mounted) {
+                                                    newSet(() {});
                                                   }
+                                                  QiNiu().uploadImages(images,
+                                                      '$ak:${model.msg}',
+                                                      uploadResult: (t) async {
+                                                    imagesList
+                                                        .add(t.data['hash']);
+                                                    if (imagesList.length ==
+                                                        images.length) {
+                                                      var data = {
+                                                        "gPrice": _price,
+                                                        "gName": _gName.text,
+                                                        "gDec": _gDec.text,
+                                                        "gImages": imagesList,
+                                                        "gStar": 0,
+                                                        "schoolLocation":
+                                                            schoolLocation,
+                                                        "category": category,
+                                                        "mainPic": imagesList[
+                                                            mainPicIndex]
+                                                      };
+                                                      var result =
+                                                          await GoodsService()
+                                                              .addGood(data);
+                                                      if (result.data['code'] ==
+                                                          200) {
+                                                        Navigator.pop(context);
+                                                        Navigator.pushReplacementNamed(
+                                                            context,
+                                                            RouteName
+                                                                .uploadPageOk,
+                                                            arguments: result
+                                                                    .data[
+                                                                'data']['gId']);
+                                                      } else {
+                                                        showToast('上传失败');
+                                                        Navigator.pop(context);
+                                                      }
+                                                    }
+                                                  }, uploadProgress: (c, t) {
+                                                    currentIndex = c;
+                                                    currentProgress = t;
+                                                    if (mounted) {
+                                                      newSet(() {});
+                                                    }
+                                                  }, uploadSize: (c) {
+                                                    totalSize += c;
+                                                    if (mounted) {
+                                                      newSet(() {});
+                                                    }
+                                                  });
                                                 }
-                                              }, uploadProgress: (c, t) {
-                                                currentIndex = c;
-                                                currentProgress = t;
-                                                if (mounted) {
-                                                  newSet(() {});
-                                                }
-                                              }, uploadSize: (c) {
-                                                totalSize += c;
-                                                if (mounted) {
-                                                  newSet(() {});
-                                                }
-                                              });
-                                        }
-                                      }, onError: (e) {});
-                                  onlyOne++;
-                                }
-                                return Material(
-                                  type: MaterialType.transparency,
-                                  child: Center(
-                                    child: Container(
-                                      height: setHeight(550),
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                          BorderRadius.circular(15)),
-                                      margin: EdgeInsets.only(
-                                        left: 30,
-                                        right: 30,
-                                      ),
-                                      padding: EdgeInsets.only(
-                                          top: setHeight(30), left: 20, right: 20),
-                                      child: Column(
-                                        children: <Widget>[
-                                          Container(
-                                            alignment: Alignment.center,
-                                            width: double.infinity,
-                                            margin:
-                                            EdgeInsets.only(bottom: 10),
-                                            child: Text(
-                                              '开始上传图片',
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight:
-                                                  FontWeight.bold,
-                                                  fontSize: 24),
-                                            ),
-                                          ),
-                                          Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              children: <Widget>[
-                                                Text(
-                                                  '获取Token:',
-                                                  style: TextStyle(
-                                                      color: Colors.black54,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                      FontWeight.w500),
-                                                ),
-                                                isGetToken
-                                                    ? Text(
-                                                  '获取成功',
-                                                  style: TextStyle(
-                                                      color: Colors
-                                                          .greenAccent,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                      FontWeight
-                                                          .bold),
-                                                )
-                                                    : CupertinoActivityIndicator()
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Token解密:',
-                                                  style: TextStyle(
-                                                      color: Colors.black54,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                      FontWeight.w500),
-                                                ),
-                                                isJiMi
-                                                    ? Text(
-                                                  '解密成功',
-                                                  style: TextStyle(
-                                                      color: Colors
-                                                          .greenAccent,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                      FontWeight
-                                                          .bold),
-                                                )
-                                                    : CupertinoActivityIndicator()
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            alignment: Alignment.centerLeft,
-                                            child: Text.rich(
-                                                TextSpan(children: [
-                                                  TextSpan(
-                                                    text: '图片数量: ',
-                                                    style: TextStyle(
-                                                        color: Colors.black54,
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                        FontWeight.w500),
+                                              }, onError: (e) {});
+                                              onlyOne++;
+                                            }
+                                            return Material(
+                                              type: MaterialType.transparency,
+                                              child: Center(
+                                                child: Container(
+                                                  height: setHeight(550),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15)),
+                                                  margin: EdgeInsets.only(
+                                                    left: 30,
+                                                    right: 30,
                                                   ),
-                                                  TextSpan(
-                                                      text: images.length
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                          color:
-                                                          Colors.blueAccent,
-                                                          fontSize: 17)),
-                                                  TextSpan(
-                                                    text: '     总大小: ',
-                                                    style: TextStyle(
-                                                        color: Colors.black54,
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                        FontWeight.w500),
-                                                  ),
-                                                  TextSpan(
-                                                      text: totalSize == 0
-                                                          ? '计算中'
-                                                          : '${(totalSize / 1024 / 1024).toString().substring(0, 6)}Mb',
-                                                      style: TextStyle(
-                                                          color: Colors
-                                                              .blueAccent)),
-                                                ])),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            height: setHeight(190),
-                                            child: AnimatedSwitcher(
-                                              duration:
-                                              Duration(milliseconds: 100),
-                                              child: totalSize == 0
-                                                  ?Center(
-                                                key: ValueKey('2'),
-                                                child: CupertinoActivityIndicator(),
-                                              )
-                                                  : Column(
-                                                key: ValueKey('1'),
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                      children: <
-                                                          Widget>[
-                                                        Text.rich(TextSpan(
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                '正在上传第 ',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .black54,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                              TextSpan(
-                                                                text:
-                                                                '$currentIndex',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .blueAccent,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                              TextSpan(
-                                                                text:
-                                                                ' 张',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .black54,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                            ])),
-                                                        Text.rich(TextSpan(
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                '还剩 ',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .black54,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                              TextSpan(
-                                                                text:
-                                                                '${images.length - currentIndex}',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .blueAccent,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                              TextSpan(
-                                                                text:
-                                                                ' 张',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .black54,
-                                                                    fontSize:
-                                                                    15,
-                                                                    fontWeight:
-                                                                    FontWeight.w500),
-                                                              ),
-                                                            ])),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Stack(
+                                                  padding: EdgeInsets.only(
+                                                      top: setHeight(30),
+                                                      left: 20,
+                                                      right: 20),
+                                                  child: Column(
                                                     children: <Widget>[
-                                                      Align(
-                                                          alignment:
-                                                          Alignment
-                                                              .center,
-                                                          child:
-                                                          Container(
-                                                            height: 50,
-                                                            width: 50,
-                                                            child:
-                                                            CircularProgressIndicator(
-                                                              value:
-                                                              currentProgress,
-
-                                                              backgroundColor:
-                                                              Colors.black,
-                                                            ),
-                                                          )),
-                                                      Align(
+                                                      Container(
                                                         alignment:
-                                                        Alignment
-                                                            .center,
-                                                        child:
-                                                        Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          child: Align(
-                                                            alignment:
-                                                            Alignment
+                                                            Alignment.center,
+                                                        width: double.infinity,
+                                                        margin: EdgeInsets.only(
+                                                            bottom: 10),
+                                                        child: Text(
+                                                          '开始上传图片',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 24),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: <Widget>[
+                                                            Text(
+                                                              '获取Token:',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .black54,
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                            isGetToken
+                                                                ? Text(
+                                                                    '获取成功',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .greenAccent,
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  )
+                                                                : CupertinoActivityIndicator()
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Container(
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: <Widget>[
+                                                            Text(
+                                                              'Token解密:',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .black54,
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                            isJiMi
+                                                                ? Text(
+                                                                    '解密成功',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .greenAccent,
+                                                                        fontSize:
+                                                                            15,
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  )
+                                                                : CupertinoActivityIndicator()
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Container(
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        child: Text.rich(
+                                                            TextSpan(children: [
+                                                          TextSpan(
+                                                            text: '图片数量: ',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                          TextSpan(
+                                                              text: images
+                                                                  .length
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .blueAccent,
+                                                                  fontSize:
+                                                                      17)),
+                                                          TextSpan(
+                                                            text: '     总大小: ',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                          TextSpan(
+                                                              text: totalSize ==
+                                                                      0
+                                                                  ? '计算中'
+                                                                  : '${(totalSize / 1024 / 1024).toString().substring(0, 6)}Mb',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .blueAccent)),
+                                                        ])),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Container(
+                                                        height: setHeight(190),
+                                                        child: AnimatedSwitcher(
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  100),
+                                                          child: totalSize == 0
+                                                              ? Center(
+                                                                  key: ValueKey(
+                                                                      '2'),
+                                                                  child:
+                                                                      CupertinoActivityIndicator(),
+                                                                )
+                                                              : Column(
+                                                                  key: ValueKey(
+                                                                      '1'),
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Container(
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: <
+                                                                            Widget>[
+                                                                          Text.rich(
+                                                                              TextSpan(children: [
+                                                                            TextSpan(
+                                                                              text: '正在上传第 ',
+                                                                              style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                            TextSpan(
+                                                                              text: '$currentIndex',
+                                                                              style: TextStyle(color: Colors.blueAccent, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                            TextSpan(
+                                                                              text: ' 张',
+                                                                              style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                          ])),
+                                                                          Text.rich(
+                                                                              TextSpan(children: [
+                                                                            TextSpan(
+                                                                              text: '还剩 ',
+                                                                              style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                            TextSpan(
+                                                                              text: '${images.length - currentIndex}',
+                                                                              style: TextStyle(color: Colors.blueAccent, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                            TextSpan(
+                                                                              text: ' 张',
+                                                                              style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                          ])),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          10,
+                                                                    ),
+                                                                    Stack(
+                                                                      children: <
+                                                                          Widget>[
+                                                                        Align(
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            child: Container(
+                                                                              height: 50,
+                                                                              width: 50,
+                                                                              child: CircularProgressIndicator(
+                                                                                value: currentProgress,
+                                                                                backgroundColor: Colors.black,
+                                                                              ),
+                                                                            )),
+                                                                        Align(
+                                                                          alignment:
+                                                                              Alignment.center,
+                                                                          child:
+                                                                              Container(
+                                                                            height:
+                                                                                50,
+                                                                            width:
+                                                                                50,
+                                                                            child:
+                                                                                Align(
+                                                                              alignment: Alignment.center,
+                                                                              child: Text('${(currentProgress * 100).toDouble().toString().substring(0, 3)}%'),
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                        ),
+                                                      ),
+                                                      Align(
+                                                        alignment: Alignment
+                                                            .bottomRight,
+                                                        child: InkWell(
+                                                          onTap: () {
+                                                            dismissAllToast();
+                                                            showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (ctx2) {
+                                                                  return CupertinoAlertDialog(
+                                                                    title: Text(
+                                                                        '提示！'),
+                                                                    content: Text(
+                                                                        '中断上传吗？'),
+                                                                    actions: <
+                                                                        Widget>[
+                                                                      FlatButton(
+                                                                          onPressed:
+                                                                              () {
+                                                                            Navigator.pop(ctx2);
+                                                                          },
+                                                                          child:
+                                                                              Text('否')),
+                                                                      FlatButton(
+                                                                          onPressed:
+                                                                              () {
+                                                                            QiNiu().uploadCancel();
+                                                                            dismissAllToast();
+                                                                            Navigator.pop(ctx2);
+                                                                            Navigator.pop(context);
+                                                                          },
+                                                                          child:
+                                                                              Text('是'))
+                                                                    ],
+                                                                  );
+                                                                });
+                                                          },
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(7),
+                                                          child: Container(
+                                                            width:
+                                                                setWidth(120),
+                                                            height:
+                                                                setHeight(50),
+                                                            alignment: Alignment
                                                                 .center,
                                                             child: Text(
-                                                                '${(currentProgress * 100).toDouble().toString().substring(0, 3)}%'),
+                                                              '取消',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .white),
+                                                            ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          7),
+                                                              color:
+                                                                  Colors.blue,
+                                                            ),
                                                           ),
                                                         ),
-                                                      )
+                                                      ),
                                                     ],
-                                                  )
-                                                ],
+                                                  ),
+                                                ),
                                               ),
+                                            );
+                                          },
+                                        );
+                                      });
+                                },
+                                child: Text('继续'))
+                          ],
+                        );
+                      });
+                }
+                if (_connectivityResult == ConnectivityResult.wifi) {
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        int onlyOne = 0;
+                        int totalSize = 0;
+                        bool isGetToken = false;
+                        bool isJiMi = false;
+                        int currentIndex = 1;
+                        double currentProgress = 0.1;
+                        List<String> imagesList = [];
+
+                        return StatefulBuilder(
+                          builder: (context, newSet) {
+                            if (onlyOne == 0) {
+                              GoodsService().getImageToken().then((val) async {
+                                BaseModel model = BaseModel.fromJson(val.data);
+                                if (model.code == 200) {
+                                  isGetToken = true;
+                                  if (mounted) {
+                                    newSet(() {});
+                                  }
+                                  var ak = await JiaMi.jm(model.token);
+                                  isJiMi = true;
+                                  if (mounted) {
+                                    newSet(() {});
+                                  }
+                                  QiNiu()
+                                      .uploadImages(images, '$ak:${model.msg}',
+                                          uploadResult: (t) async {
+                                    imagesList.add(t.data['hash']);
+                                    if (imagesList.length == images.length) {
+                                      var data = {
+                                        "gPrice": _price,
+                                        "gName": _gName.text,
+                                        "gDec": _gDec.text,
+                                        "gImages": imagesList,
+                                        "gStar": 0,
+                                        "schoolLocation": schoolLocation,
+                                        "category": category,
+                                        "mainPic": imagesList[mainPicIndex]
+                                      };
+                                      var result =
+                                          await GoodsService().addGood(data);
+                                      print(':${result.data}');
+                                      if (result.data['code'] == 200) {
+                                        Navigator.pop(context);
+                                        Navigator.pushReplacementNamed(
+                                            context, RouteName.uploadPageOk,
+                                            arguments: result.data['data']
+                                                ['gId']);
+                                      } else {
+                                        showToast('上传失败');
+                                        Navigator.pop(context);
+                                      }
+                                    }
+                                  }, uploadProgress: (c, t) {
+                                    currentIndex = c;
+                                    currentProgress = t;
+                                    if (mounted) {
+                                      newSet(() {});
+                                    }
+                                  }, uploadSize: (c) {
+                                    totalSize += c;
+                                    if (mounted) {
+                                      newSet(() {});
+                                    }
+                                  });
+                                }
+                              }, onError: (e) {});
+                              onlyOne++;
+                            }
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Center(
+                                child: Container(
+                                  height: setHeight(550),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(15)),
+                                  margin: EdgeInsets.only(
+                                    left: 30,
+                                    right: 30,
+                                  ),
+                                  padding: EdgeInsets.only(
+                                      top: setHeight(30), left: 20, right: 20),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width: double.infinity,
+                                        margin: EdgeInsets.only(bottom: 10),
+                                        child: Text(
+                                          '开始上传图片',
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 24),
+                                        ),
+                                      ),
+                                      Container(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                              '获取Token:',
+                                              style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500),
                                             ),
+                                            isGetToken
+                                                ? Text(
+                                                    '获取成功',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.greenAccent,
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )
+                                                : CupertinoActivityIndicator()
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                              'Token解密:',
+                                              style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                            isJiMi
+                                                ? Text(
+                                                    '解密成功',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.greenAccent,
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )
+                                                : CupertinoActivityIndicator()
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text.rich(TextSpan(children: [
+                                          TextSpan(
+                                            text: '图片数量: ',
+                                            style: TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500),
                                           ),
-                                          Align(
-                                            alignment: Alignment.bottomRight,
-                                            child:InkWell(
-                                              onTap: (){
-                                                dismissAllToast();
-                                                showDialog(context: context,builder: (ctx2){
+                                          TextSpan(
+                                              text: images.length.toString(),
+                                              style: TextStyle(
+                                                  color: Colors.blueAccent,
+                                                  fontSize: 17)),
+                                          TextSpan(
+                                            text: '     总大小: ',
+                                            style: TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          TextSpan(
+                                              text: totalSize == 0
+                                                  ? '计算中'
+                                                  : '${(totalSize / 1024 / 1024).toString().substring(0, 6)}Mb',
+                                              style: TextStyle(
+                                                  color: Colors.blueAccent)),
+                                        ])),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(
+                                        height: setHeight(190),
+                                        child: AnimatedSwitcher(
+                                          duration: Duration(milliseconds: 100),
+                                          child: totalSize == 0
+                                              ? Center(
+                                                  key: ValueKey('2'),
+                                                  child:
+                                                      CupertinoActivityIndicator(),
+                                                )
+                                              : Column(
+                                                  key: ValueKey('1'),
+                                                  children: <Widget>[
+                                                    Container(
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: <Widget>[
+                                                          Text.rich(TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      '正在上传第 ',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black54,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                TextSpan(
+                                                                  text:
+                                                                      '$currentIndex',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .blueAccent,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                TextSpan(
+                                                                  text: ' 张',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black54,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                              ])),
+                                                          Text.rich(TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text: '还剩 ',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black54,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                TextSpan(
+                                                                  text:
+                                                                      '${images.length - currentIndex}',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .blueAccent,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                TextSpan(
+                                                                  text: ' 张',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black54,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                              ])),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Stack(
+                                                      children: <Widget>[
+                                                        Align(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            child: Container(
+                                                              height: 50,
+                                                              width: 50,
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                value:
+                                                                    currentProgress,
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .black,
+                                                              ),
+                                                            )),
+                                                        Align(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Container(
+                                                            height: 50,
+                                                            width: 50,
+                                                            child: Align(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Text(
+                                                                  '${(currentProgress * 100).toDouble().toString().substring(0, 3)}%'),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: InkWell(
+                                          onTap: () {
+                                            dismissAllToast();
+                                            showDialog(
+                                                context: context,
+                                                builder: (ctx2) {
                                                   return CupertinoAlertDialog(
                                                     title: Text('提示！'),
                                                     content: Text('中断上传吗？'),
                                                     actions: <Widget>[
-                                                      FlatButton(onPressed: (){
-                                                        Navigator.pop(ctx2);
-                                                      }, child: Text('否')),
-                                                      FlatButton(onPressed: (){
-                                                        QiNiu().uploadCancel();
-                                                        dismissAllToast();
-                                                        Navigator.pop(ctx2);
-                                                        Navigator.pop(context);
-                                                      }, child: Text('是'))
+                                                      FlatButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(ctx2);
+                                                          },
+                                                          child: Text('否')),
+                                                      FlatButton(
+                                                          onPressed: () {
+                                                            QiNiu()
+                                                                .uploadCancel();
+                                                            dismissAllToast();
+                                                            Navigator.pop(ctx2);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Text('是'))
                                                     ],
                                                   );
                                                 });
-
-                                              },
-                                              borderRadius: BorderRadius.circular(7),
-                                              child:  Container(
-                                                width: setWidth(120),
-                                                height: setHeight(50),
-                                                alignment: Alignment.center,
-                                                child: Text('取消',style: TextStyle(
-                                                    color: Colors.white
-                                                ),),
-
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(7),
-                                                  color: Colors.blue,
-
-                                                ),
-
-
-                                              ),
+                                          },
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                          child: Container(
+                                            width: setWidth(120),
+                                            height: setHeight(50),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              '取消',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(7),
+                                              color: Colors.blue,
                                             ),
                                           ),
-
-                                        ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             );
-                          });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: setHeight(80),
-                      child: Text(
-                        '提交',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                      alignment: Alignment.center,
-                    ),
-                    color: Colors.yellow,
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                ],
-              ),)),
+                          },
+                        );
+                      });
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                height: 50,
+                child: Text(
+                  '提交',
+                  style: TextStyle(
+                      letterSpacing: 10,
+                      fontSize: 17,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                ),
+                alignment: Alignment.center,
+              ),
+              color: Colors.blueAccent,
+            ),
+            SizedBox(
+              height: 30,
+            ),
+          ],
+        ),
+      )),
     );
   }
 }
 
 class QiNiu {
- static  Dio dio;
+  static Dio dio;
 
-   uploadImages(List<Asset> images, String token,
+  uploadImages(List<Asset> images, String token,
       {UploadProgress uploadProgress,
       UploadResult uploadResult,
       UploadSize uploadSize}) async {
-     dio = Dio(BaseOptions(contentType: 'multipart/form-data'));
-      List<FormData> dataList = [];
-      images.forEach((image) async {
+    dio = Dio(BaseOptions(contentType: 'multipart/form-data'));
+    List<FormData> dataList = [];
+    images.forEach((image) async {
       var name = image.name;
       var byte = await image.getByteData();
       uploadSize(byte.buffer.lengthInBytes);
@@ -1000,8 +1399,10 @@ class QiNiu {
               uploadResult(val);
               i++;
               run();
-            },onError: (e){
-              showToast('出错啦,请重新上传\n$e',duration: Duration(seconds: 6),position: ToastPosition.bottom);
+            }, onError: (e) {
+              showToast('出错啦,请重新上传\n$e',
+                  duration: Duration(seconds: 6),
+                  position: ToastPosition.bottom);
             });
           } else {
             return;
@@ -1013,8 +1414,7 @@ class QiNiu {
     });
   }
 
-   uploadCancel() {
-
+  uploadCancel() {
     dio.close(force: true);
   }
 }

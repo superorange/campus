@@ -39,6 +39,8 @@ dependencies:
   flutter_easyrefresh: ^2.0.9
   web_socket_channel: ^1.1.0
   hive: ^1.4.1+1
+  hive_flutter: ^0.3.0+2
+  synchronized: ^2.2.0
 
 
 

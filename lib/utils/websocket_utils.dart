@@ -2,88 +2,88 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_app/config/api/api.dart';
-import 'package:flutter_app/database/chatting_db.dart';
-import 'package:flutter_app/model/chatters_model.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:web_socket_channel/io.dart';
 
-class WebSocketUtils{
+class WebSocketUtils {
   WebSocketUtils._init();
-  ChattersModel _chattersModel;
-  ChattersDb chattersDb=ChattersDb();
   static WebSocketUtils _webSocketUtils;
-  StreamController chattersController=StreamController.broadcast();
+  StreamController chattersController = StreamController.broadcast();
   StreamController chattingController = StreamController.broadcast();
   IOWebSocketChannel _channel;
   StreamSubscription _subscription;
-  void startConnect()async{
-    if(_channel==null){
-      _channel=IOWebSocketChannel.connect(Api.socketUrl+Api.chat,headers: {
-        'Authorization':Api.token
-      },);
-      _subscription = _channel.stream.listen(_handleData,onDone: _socketDone);
+  bool isOk = false;
+  void startConnect() async {
+    if (_channel == null) {
+      _channel = IOWebSocketChannel.connect(
+        Api.socketUrl + Api.chat,
+        headers: {'Authorization': Api.token},
+      );
+      _subscription = _channel.stream.listen(_handleData, onDone: _socketDone,
+          onError: (e, s) {
+        showToast('网络错误');
+        isOk = false;
+        _subscription.cancel();
+      }, cancelOnError: true);
     }
-    
-
   }
-  void _socketDone(){
 
+  void _socketDone() {
+    isOk = false;
+    _subscription.cancel();
   }
-  void _handleData(dynamic data){
+
+  void _handleData(dynamic data) {
+    print('处理！');
+    if (!isOk) isOk = true;
     var jsonData = jsonDecode(data);
-    _chattersModel=ChattersModel.fromJson(jsonData);
-    print('收到消息:$jsonData');
-    if(jsonData['type']=='chatting'){
-
-      chattingController.add(data);
+    if (jsonData['type'] == 'chatting') {
+      chattingController.add(jsonData);
     }
-    if(jsonData['type']=='chatters'){
-
-
-      chattersDb.addChatters(_chattersModel);
-      chattersController.add(data);
+    if (jsonData['type'] == 'chatter') {
+      chattersController.add(jsonData);
     }
-
   }
-  void resetConnect(){
-    _channel=IOWebSocketChannel.connect(Api.socketUrl+Api.chat,headers: {
-      'Authorization':Api.token
-    },);
+
+  void resetConnect() {
+    _channel = IOWebSocketChannel.connect(
+      Api.socketUrl + Api.chat,
+      headers: {'Authorization': Api.token},
+    );
+    _subscription = _channel.stream.listen(_handleData, onDone: _socketDone,
+        onError: (e, s) {
+      showToast('网络错误');
+      isOk = false;
+      _subscription.cancel();
+    }, cancelOnError: true);
+  }
+
+  void getChatters() {
+    _channel.sink.add(jsonEncode({
+      'code': 202,
+    }));
+  }
+
+  dispose() {
+    isOk = false;
     _subscription.cancel();
-    _subscription = _channel.stream.listen(_handleData);
-
+    _channel = null;
   }
-  
-  void getChatters(){
+
+  void sendData(String msg, String toId) {
+    _channel.sink.add(jsonEncode({'code': 200, 'toId': toId, 'msg': msg}));
+  }
+
+  void getHistoryMessage() {
     _channel.sink.add(jsonEncode({
-      'type':'getChatters',
-      'toId':'',
-      'msg':''
+      'code': 203,
     }));
   }
-  dispose(){
-    _subscription.cancel();
 
+  factory WebSocketUtils() {
+    return _webSocketUtils ??= WebSocketUtils._init();
   }
-  
-  void sendData(String msg,String toId){
-    _channel.sink.add(jsonEncode({
-      'type':'chatting',
-      'toId':toId,
-      'msg':msg
-    }));
+  void createNewChatter(String toId) {
+//    _channel.sink.add(jsonEncode(CreateConnectModel.toJson(toId)));
   }
-  void getHistoryMessage(String toId){
-    print('发送消息$toId');
-    _channel.sink.add(jsonEncode({
-      'type':'notRead',
-      'toId':toId,
-      'msg':''
-    }));
-  }
-  
-  factory WebSocketUtils(){
-    return _webSocketUtils??=WebSocketUtils._init();
-  }
-
-
 }

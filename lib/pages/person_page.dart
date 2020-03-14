@@ -1,148 +1,370 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/font/font_style.dart';
+import 'package:flutter_app/pages/vm/person_page_vm.dart';
+import 'package:flutter_app/routes/routes.dart';
+import 'package:flutter_app/utils/base_utils.dart';
+import 'package:flutter_app/utils/global_config.dart';
 import 'package:flutter_app/utils/screen_config.dart';
 import 'package:flutter_app/widget/tab_widget.dart';
+import 'package:flutter_easyrefresh/bezier_circle_header.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 
 class PersonPage extends StatefulWidget {
   @override
   _PersonPageState createState() => _PersonPageState();
 }
 
-class _PersonPageState extends State<PersonPage> {
+class _PersonPageState extends State<PersonPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  void initState() {
+    validate();
+    super.initState();
+  }
+
+  void validate() async {
+    if (GlobalConfig().initAllisOk) {
+      Provider.of<PersonPageVm>(context, listen: false).loading().then((val) {
+        if (val == LoginState.LoginFailed) {
+          showToast('登录过期，请重新登录',
+              duration: Duration(seconds: 5),
+              backgroundColor: Colors.black,
+              textStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold));
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MediaQuery.removePadding(context: context, child: Scaffold(
-      body:ListView(
-        children: <Widget>[
-          Container(height: setHeight(485),width:double.infinity,child: Stack(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Flexible(child: Container(decoration: BoxDecoration(
-                      gradient: LinearGradient(begin:Alignment.centerLeft,end: Alignment.centerRight,colors: [
-                        Colors.blue[300],
-                        Colors.blueAccent
-                      ],)
-                  ),),flex: 4,),
-                  Flexible(child: Container(decoration: BoxDecoration(
-                      gradient: LinearGradient(begin:Alignment.centerLeft,end: Alignment.centerRight,colors: [
-                        Colors.white60,
-                        Colors.white
-                      ],)
-                  ),),flex: 1,),
-                ],
-              ),
-              Container(height: setHeight(485),width:double.infinity,child: Column(crossAxisAlignment: CrossAxisAlignment.center,children: <Widget>[
-                SizedBox(height: setHeight(80),),
-                Text('个人中心',style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 20
-                ),),
-                SizedBox(height: setHeight(20),),
-                CircleAvatar(),
-                SizedBox(height: setHeight(20),),
-                Text('牵着李白去吃肉'),
-                SizedBox(height: setHeight(30),),
-                Card(
-                  child: Container(
-                    height: setHeight(150),
-                    width: double.infinity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    super.build(context);
+    return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Scaffold(
+          body: Consumer<PersonPageVm>(builder: (context, vm, _) {
+            print('model:${vm.user}');
+            if (vm.user == null) {
+              return Material(
+                child: Center(
+                  child: FlatButton(
+                      color: Colors.blue,
+                      onPressed: () {
+                        Navigator.pushNamed(context, RouteName.login);
+                      },
+                      child: Text('登录')),
+                ),
+              );
+            }
+            return EasyRefresh(
+                header: BezierCircleHeader(),
+                onRefresh: () async {
+                  vm.loading();
+                },
+                child: ListView(
+                  children: <Widget>[
+                    Container(
+                      height: 320,
+                      width: double.infinity,
+                      child: Stack(
                         children: <Widget>[
-                          Text.rich(
-                            TextSpan(
-                                text: '你好 ',
-                                children: [
-                                  TextSpan(text: '田锦岗同学'),
-
-                                ]),),
-                          Text.rich(
-                            TextSpan(
-                                text: '学号 ',
-                                children: [
-                                  TextSpan(text: 't1670494917'),
-
-                                ]),),
+                          Column(
+                            children: <Widget>[
+                              Container(
+                                height: 260,
+                                decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [Colors.blue[300], Colors.blueAccent],
+                                )),
+                              ),
+                              Expanded(child: Container()),
+                            ],
+                          ),
+                          Container(
+                            height: 350,
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 50,
+                                ),
+                                Text(
+                                  '个人中心',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20),
+                                ),
+                                const SizedBox(
+                                  height: 25,
+                                ),
+                                CircleAvatar(),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                InkWell(
+                                  onTap: vm.user.userName == '未设置用户名'
+                                      ? () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return ModifyInformationWidget(
+                                                    '修改用户名', '请输入新用户名', (val) {
+                                                  print('v:$val');
+                                                });
+                                              });
+                                        }
+                                      : null,
+                                  child: Text(
+                                    vm.user.userName == '未设置用户名'
+                                        ? '未设置用户名，点击更改'
+                                        : '${vm.user.userName}',
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 17),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 30,
+                                ),
+                                Card(
+                                  child: vm.user.xh.isEmpty
+                                      ? Center(
+                                          child: FlatButton(
+                                              color: Colors.brown,
+                                              onPressed: () {},
+                                              child: Container(
+                                                margin: EdgeInsets.only(
+                                                    top: 35, bottom: 35),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  '绑定学号',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 20),
+                                                ),
+                                              )),
+                                        )
+                                      : Container(
+                                          height: 100,
+                                          width: double.infinity,
+                                          child: Theme(
+                                              data: ThemeData(
+                                                  textTheme: TextTheme(
+                                                      display2: TextStyle(
+                                                          fontSize: 39))),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: <Widget>[
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: <Widget>[
+                                                      Text.rich(
+                                                        TextSpan(
+                                                            text: '你好 ',
+                                                            children: [
+                                                              TextSpan(
+                                                                text:
+                                                                    '${vm.user.name}',
+                                                              ),
+                                                              TextSpan(
+                                                                  text: '同学'),
+                                                            ]),
+                                                      ),
+                                                      Text.rich(
+                                                        TextSpan(
+                                                            text: '学号 ',
+                                                            children: [
+                                                              TextSpan(
+                                                                  text:
+                                                                      't1670494917'),
+                                                            ]),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: <Widget>[
+                                                      Text.rich(
+                                                        TextSpan(
+                                                            text: '四川轻化工大学 ',
+                                                            children: [
+                                                              TextSpan(
+                                                                  text: '宜宾校区'),
+                                                            ]),
+                                                      ),
+                                                      Text.rich(
+                                                        TextSpan(
+                                                            text: '计算机学院 ',
+                                                            children: [
+                                                              TextSpan(
+                                                                  text:
+                                                                      '网络工程2班'),
+                                                            ]),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              )),
+                                        ),
+                                  color: Colors.white,
+                                  margin: EdgeInsets.only(
+                                      left: setWidth(25), right: setWidth(25)),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Text.rich(
-                              TextSpan(
-                                  text: '四川轻化工大学 ',
-                                  children: [
-                                    TextSpan(text: '宜宾校区'),
-
-                                  ]),),
-                            Text.rich(
-                              TextSpan(
-                                  text: '计算机学院 ',
-                                  children: [
-                                    TextSpan(text: '网络工程2班'),
-
-                                  ]),),
-                          ],
-                        ),
-                      ],
                     ),
-                  ),
-                  color: Colors.white,
-                  margin:
-                  EdgeInsets.only(left: setWidth(25), right: setWidth(25)),
-                ),
+                    Divider(),
+                    Container(
+                      height: setHeight(80),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          TABWidget(
+                              t: Text('${vm.user.collection}'),
+                              b: Text(
+                                '收藏',
+                                style: AppStyle.personPageStyle(),
+                              )),
+                          TABWidget(
+                              t: Text('${vm.user.fans}'),
+                              b: Text('粉丝', style: AppStyle.personPageStyle())),
+                          TABWidget(
+                              t: Text('${vm.user.post}'),
+                              b: Text('帖子', style: AppStyle.personPageStyle())),
+                          TABWidget(
+                              t: Text('${vm.user.goodsCount}'),
+                              b: Text('商品', style: AppStyle.personPageStyle())),
+                        ],
+                      ),
+                    ),
+                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ModifyInformationWidget('修改密码', '请输入新密码',
+                                  (val) {
+                                print('v:$val');
+                              });
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('密码修改',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Text('密码178天没有修改啦'),
+                              c: Icon(Icons.lock))),
+                    ),
+                    Divider(),
+                    Container(
+                        height: setHeight(60),
+                        padding: EdgeInsets.only(
+                            left: setWidth(25), right: setWidth(25)),
+                        width: double.infinity,
+                        child: InformationWidget(
+                            a: Text('上课提醒',
+                                style: AppStyle.personPageInformationStyle()),
+                            b: Text('今天有5节课'),
+                            c: Icon(Icons.notifications_none))),
+                    Divider(),
+                    Container(
+                        height: setHeight(60),
+                        padding: EdgeInsets.only(
+                            left: setWidth(25), right: setWidth(25)),
+                        width: double.infinity,
+                        child: InformationWidget(
+                            a: Text('帮助反馈',
+                                style: AppStyle.personPageInformationStyle()),
+                            b: Container(),
+                            c: Icon(Icons.help_outline))),
+                    Divider(),
+                    Container(
+                        height: setHeight(60),
+                        padding: EdgeInsets.only(
+                            left: setWidth(25), right: setWidth(25)),
+                        width: double.infinity,
+                        child: InformationWidget(
+                            a: Text('系统设置',
+                                style: AppStyle.personPageInformationStyle()),
+                            b: Container(),
+                            c: Icon(Icons.settings))),
+                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return CupertinoAlertDialog(
+                                title: Text('确定退出登录吗'),
+                                content: Text('温馨提示：退出登录后将无法找回现有聊天等数据！'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('取消')),
+                                  FlatButton(
+                                      onPressed: () async {
+                                        await vm.clearUser(context);
 
-
-
-              ],),),
-            ],
-          ),),
-          SizedBox(height: setHeight(20),),
-          Divider(),
-          Container(height: setHeight(80),child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              TABWidget(t: Text('29'), b: Text('收藏',style: AppStyle.personPageStyle(),)),
-              TABWidget(t: Text('29'), b: Text('粉丝',style: AppStyle.personPageStyle())),
-              TABWidget(t: Text('29'), b: Text('帖子',style: AppStyle.personPageStyle())),
-              TABWidget(t: Text('29'), b: Text('商品',style: AppStyle.personPageStyle())),
-
-            ],
-          ),),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('我的同学',style: AppStyle.personPageInformationStyle()), b: Text('97'), c: Icon(Icons.person))),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('密码修改',style: AppStyle.personPageInformationStyle()), b: Text('密码178天没有修改啦'), c: Icon(Icons.lock))),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('上课提醒',style: AppStyle.personPageInformationStyle()), b: Text('今天有5节课'), c: Icon(Icons.notifications_none))),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('帮助反馈',style: AppStyle.personPageInformationStyle()), b: Container(), c: Icon(Icons.help_outline))),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('系统设置',style: AppStyle.personPageInformationStyle()), b: Container(), c: Icon(Icons.settings))),
-          Divider(),
-          Container(height: setHeight(60),padding: EdgeInsets.only(left: setWidth(25),right: setWidth(25)),width:double.infinity,child:
-          InformationWidget(a: Text('退出登录',style: AppStyle.personPageInformationStyle()), b: Container(), c: Icon(Icons.shuffle))),
-          Divider(),
-        ],
-      ),
-    ),removeTop: true,);
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('退出'))
+                                ],
+                              );
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('退出登录',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Container(),
+                              c: Icon(Icons.shuffle))),
+                    ),
+                    Divider(),
+                  ],
+                ));
+          }),
+        ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
+
+// ignore: must_be_immutable
 class InformationWidget extends StatelessWidget {
-  Widget a,b,c;
-  InformationWidget({@required this.a,@required this.b,@required this.c});
+  Widget a, b, c;
+  InformationWidget({@required this.a, @required this.b, @required this.c});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -153,9 +375,7 @@ class InformationWidget extends StatelessWidget {
             width: setWidth(600),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                a,b
-              ],
+              children: <Widget>[a, b],
             ),
           ),
           c,
@@ -165,3 +385,39 @@ class InformationWidget extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
+class ModifyInformationWidget extends StatelessWidget {
+  TextEditingController _textEditingController = TextEditingController();
+  String title;
+  String hintText;
+  Function onClick;
+  ModifyInformationWidget(this.title, this.hintText, this.onClick);
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('$title'),
+      content: TextField(
+        controller: _textEditingController,
+        decoration: InputDecoration(hintText: '$hintText'),
+      ),
+      actions: <Widget>[
+        FlatButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('取消')),
+        FlatButton(
+            onPressed: () {
+              if (_textEditingController.text.length >= 4 &&
+                  _textEditingController.text.length <= 12) {
+                onClick(_textEditingController.text);
+                Navigator.pop(context);
+                return;
+              }
+              showToast('参数不合法');
+            },
+            child: Text('确定')),
+      ],
+    );
+  }
+}

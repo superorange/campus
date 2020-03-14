@@ -2,7 +2,7 @@ class ChatModel {
   int code;
   String type;
   String mean;
-  List<ChatMsg> chatMsg=[];
+  List<ChatMsg> chatMsg = [];
 
   ChatModel({this.code, this.type, this.mean, this.chatMsg});
 
@@ -33,16 +33,18 @@ class ChatModel {
 class ChatMsg {
   String userId;
   String toId;
-  int createTime;
+  String createTime;
   String msg;
+  int sign;
 
-  ChatMsg({this.userId, this.toId, this.createTime, this.msg});
+  ChatMsg({this.userId, this.toId, this.createTime, this.msg, this.sign});
 
   ChatMsg.fromJson(Map<String, dynamic> json) {
     userId = json['userId'];
     toId = json['toId'];
     createTime = json['createTime'];
     msg = json['msg'];
+    sign = json['sign'];
   }
 
   Map<String, dynamic> toJson() {
@@ -51,6 +53,7 @@ class ChatMsg {
     data['toId'] = this.toId;
     data['createTime'] = this.createTime;
     data['msg'] = this.msg;
+    data['sign'] = this.sign;
     return data;
   }
 }

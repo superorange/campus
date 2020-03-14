@@ -2,18 +2,18 @@ class GoodsListModel {
   int code;
   String msg;
   String token;
-  List<Data> data;
+  List<GoodsModel> goodsModel;
 
-  GoodsListModel({this.code, this.msg, this.token, this.data});
+  GoodsListModel({this.code, this.msg, this.token, this.goodsModel});
 
   GoodsListModel.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     msg = json['msg'];
     token = json['token'];
     if (json['data'] != null) {
-      data = new List<Data>();
+      goodsModel = new List<GoodsModel>();
       json['data'].forEach((v) {
-        data.add(new Data.fromJson(v));
+        goodsModel.add(new GoodsModel.fromJson(v));
       });
     }
   }
@@ -23,14 +23,14 @@ class GoodsListModel {
     data['code'] = this.code;
     data['msg'] = this.msg;
     data['token'] = this.token;
-    if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+    if (this.goodsModel != null) {
+      data['data'] = this.goodsModel.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Data {
+class GoodsModel {
   int mainId;
   String userId;
   double gPrice;
@@ -44,21 +44,21 @@ class Data {
   String schoolLocation;
   String category;
 
-  Data(
+  GoodsModel(
       {this.mainId,
-        this.userId,
-        this.gPrice,
-        this.gId,
-        this.gName,
-        this.gDec,
-        this.gImages,
-        this.gStar,
-        this.createTime,
-        this.commentsId,
-        this.schoolLocation,
-        this.category});
+      this.userId,
+      this.gPrice,
+      this.gId,
+      this.gName,
+      this.gDec,
+      this.gImages,
+      this.gStar,
+      this.createTime,
+      this.commentsId,
+      this.schoolLocation,
+      this.category});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  GoodsModel.fromJson(Map<String, dynamic> json) {
     mainId = json['mainId'];
     userId = json['userId'];
     gPrice = double.parse(json['gPrice'].toString());

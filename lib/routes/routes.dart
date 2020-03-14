@@ -1,60 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/pages/ce_shi.dart';
 import 'package:flutter_app/pages/chat_page.dart';
-import 'package:flutter_app/pages/forum_information_page.dart';
-import 'package:flutter_app/pages/home_page.dart';
 import 'package:flutter_app/pages/index_page.dart';
 import 'package:flutter_app/pages/login_page.dart';
-import 'package:flutter_app/pages/trade_information_page.dart';
-import 'package:flutter_app/pages/trade_list_page.dart';
+import 'package:flutter_app/pages/trade_one_page.dart';
+import 'package:flutter_app/pages/trade_page.dart';
 import 'package:flutter_app/pages/trade_search_page.dart';
 import 'package:flutter_app/pages/upload_page.dart';
 import 'package:flutter_app/pages/upload_page_ok.dart';
 import 'package:flutter_app/routes/page_route.dart';
 
-class RouteName{
-  static const index ='/';
-  static const home ='/home';
-  static const login='/login';
-  static const smsLogin='/smsLogin';
-  static const pwdLogin='/pwdLogin';
-  static const tradeSearchPage='/tradeSearchPage';
-  static const tradeListPage='/TradeListPage';
-  static const tradeInformationPage='/tradeInformationPage';
+class RouteName {
+  static const index = '/';
 
-  static const uploadPage='/uploadPage';
-  static const uploadPageOk='/uploadPageOk';
+  static const login = '/login';
+  static const smsLogin = '/smsLogin';
+  static const pwdLogin = '/pwdLogin';
+  static const tradeSearchPage = '/tradeSearchPage';
+  static const tradeListPage = '/TradeListPage';
+  static const tradeInformationPage = '/tradeInformationPage';
 
-  static const chatPage='/chatPage';
+  static const uploadPage = '/uploadPage';
+  static const uploadPageOk = '/uploadPageOk';
 
-  static const ceshi='/ceshi';
+  static const chatPage = '/chatPage';
 
-  static const a='/a';
-  static const b='/b';
-  static const c='/c';
-  static const forumInformationPage='/forumInformationPage';
+  static const ceshi = '/ceshi';
 
-
+  static const a = '/a';
+  static const b = '/b';
+  static const c = '/c';
 }
 
-class AppRoute{
-  static Route<dynamic> generateRoute(RouteSettings settings){
-    switch(settings.name){
+class AppRoute {
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
       case RouteName.index:
-        return PageRouteBuilder(pageBuilder: (context,animation,_) =>IndexPage());
-      case RouteName.home:
-        return PageRouteBuilder(pageBuilder: (context,animation,_) =>HomePage());
+        return PageRouteBuilder(
+            pageBuilder: (context, animation, _) => IndexPage());
       case RouteName.login:
-        return PageRouteBuilder(pageBuilder: (context,animation,_) =>LoginPage());
+        return PageRouteBuilder(
+            pageBuilder: (context, animation, _) => LoginPage());
       case RouteName.ceshi:
-
         return DefaultRoute(child: CeShiPage());
       case RouteName.tradeSearchPage:
-        return DefaultRoute(child: TradeSearchPage());
+        return DefaultRoute(child: TradePage());
       case RouteName.tradeListPage:
         return DefaultRoute(child: TradeListPage(settings.arguments));
       case RouteName.tradeInformationPage:
-        return DefaultRoute(child: TradeInformationPage(settings.arguments));
+        return DefaultRoute(child: TradeOnePage(settings.arguments));
       case RouteName.smsLogin:
         return DefaultRoute(child: SmsLogin());
       case RouteName.chatPage:
@@ -62,9 +56,9 @@ class AppRoute{
       case RouteName.uploadPage:
         return DefaultRoute(child: UploadPage());
       case RouteName.smsLogin:
-      return DefaultRoute(child: SmsLogin());
+        return DefaultRoute(child: SmsLogin());
       case RouteName.uploadPageOk:
-        return DefaultRoute(child: UploadPageOk());
+        return DefaultRoute(child: UploadPageOk(settings.arguments));
       case RouteName.pwdLogin:
         return DefaultRoute(child: PwdLogin());
       case RouteName.a:
@@ -73,11 +67,9 @@ class AppRoute{
         return DefaultRoute(child: B());
       case RouteName.c:
         return DefaultRoute(child: C());
-      case RouteName.forumInformationPage:
-        return DefaultRoute(child: ForumInformationPage(index: settings.arguments,));
       default:
-        return PageRouteBuilder(pageBuilder: (context,animation,_) =>Container());
+        return PageRouteBuilder(
+            pageBuilder: (context, animation, _) => Container());
     }
-
   }
 }
