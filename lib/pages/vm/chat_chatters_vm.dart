@@ -6,6 +6,7 @@ import 'package:flutter_app/model/chat_model.dart';
 import 'package:flutter_app/model/chatters_model.dart';
 import 'package:flutter_app/pages/vm/base_vm.dart';
 import 'package:flutter_app/utils/websocket_utils.dart';
+import 'package:oktoast/oktoast.dart';
 
 class ChatChattersPageVm extends BaseVm with ChangeNotifier {
   DataBaseManager dataBaseManager = DataBaseManager();
@@ -23,22 +24,25 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
   void clearUser() {
     _chatters = [];
     chatMapMsg = {};
-    notifyListeners();
     webSocketUtils.dispose();
+    notifyListeners();
   }
 
-  void setInitData(String userId) {
-    if (!chatMapMsg.containsKey(userId)) {
-      chatMapMsg[userId] = [];
+  void setInitData(String toId) {
+    if (!chatMapMsg.containsKey(toId)) {
+      chatMapMsg[toId] = [];
     }
   }
 
-  void sendMsg(String msg, String id) {
-    webSocketUtils.sendData(msg, id);
+  void sendMsg(String msg, String toId) {
+    webSocketUtils.sendData(msg, toId);
   }
 
-  void init() async {
-    await DataBaseManager().init();
+  void addChatter(String toId) {
+    webSocketUtils.createNewChatter(toId);
+  }
+
+  void init() {
     if (Api.token.isNotEmpty) {
       print('数据库获取');
       dataBaseManager.getChatters().then((val) {
@@ -62,86 +66,98 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
           }
         });
       });
+      startConnect();
+    }
+  }
+
+  void startConnect() {
+    if (Api.token.isNotEmpty) {
       webSocketUtils.startConnect();
-      webSocketUtils.getChatters();
-      webSocketUtils.getHistoryMessage();
       listenChatter();
       listenChatting();
+      webSocketUtils.getChatters();
+      webSocketUtils.getHistoryMessage();
     }
   }
 
   void listenChatter() {
-    webSocketUtils.chattersController.stream.listen((data) {
-      print('收到数据123$data');
-      var model = ChattersModel.fromJson(data);
-      if (model.chatters.isNotEmpty) {
-        if (model.code == 302) {
-          //新的聊天者
-          _chatters.add(model.chatters.first);
-          dataBaseManager.insertChatter(
-              model.chatters.first.userId,
-              model.chatters.first.toId,
-              model.chatters.first.userName,
-              model.chatters.first.headPic);
-        }
-        if (model.code == 301) {
-          //存在的聊天者
-          dataBaseManager.clearChatterTable();
-          _chatters.clear();
-          model.chatters.forEach((f) {
-            _chatters.add(f);
+    if (!webSocketUtils.chattersController.hasListener) {
+      webSocketUtils.chattersController.stream.listen((data) {
+        print('收到数据123$data');
+        var model = ChattersModel.fromJson(data);
+        if (model.chatters.isNotEmpty) {
+          if (model.code == 302) {
+            //新的聊天者
+            _chatters.add(model.chatters.first);
             dataBaseManager.insertChatter(
-                f.userId, f.toId, f.userName, f.headPic);
-          });
+                model.chatters.first.userId,
+                model.chatters.first.toId,
+                model.chatters.first.userName,
+                model.chatters.first.headPic);
+          }
+          if (model.code == 301) {
+            //存在的聊天者
+            dataBaseManager.clearChatterTable();
+            _chatters.clear();
+            if (model.chatters.isNotEmpty) {
+              model.chatters.forEach((f) {
+                _chatters.add(f);
+                dataBaseManager.insertChatter(
+                    f.userId, f.toId, f.userName, f.headPic);
+              });
+            }
+          }
+          notifyListeners();
         }
-        notifyListeners();
-      }
-    });
+      });
+    }
   }
 
   void listenChatting() {
-    webSocketUtils.chattingController.stream.listen((data) {
-      print('chatting页面:$data');
-      var model = ChatModel.fromJson(data);
-      if (model.code == 210) {
-        //自己发的
-        if (!chatMapMsg.containsKey(model.chatMsg.first.toId)) {
-          chatMapMsg[model.chatMsg.first.toId] = [];
-        }
-        chatMapMsg[model.chatMsg.first.toId].add(model.chatMsg.first);
-        dataBaseManager.insertChatMsg(
-            model.chatMsg.first.userId,
-            model.chatMsg.first.toId,
-            model.chatMsg.first.msg,
-            model.chatMsg.first.sign);
-      }
-      if (model.code == 220) {
-        //收到的
-        if (!chatMapMsg.containsKey(model.chatMsg.first.userId)) {
-          chatMapMsg[model.chatMsg.first.userId] = [];
-        }
-        chatMapMsg[model.chatMsg.first.userId].add(model.chatMsg.first);
-        dataBaseManager.insertChatMsg(
-            model.chatMsg.first.userId,
-            model.chatMsg.first.toId,
-            model.chatMsg.first.msg,
-            model.chatMsg.first.sign);
-      }
-      //历史消息
-      if (model.code == 215) {
-        model.chatMsg.forEach((f) {
-          f.sign = 2;
-          print('sign:${f.sign}');
-          if (!chatMapMsg.containsKey(f.userId)) {
-            chatMapMsg[f.userId] = [];
+    if (!webSocketUtils.chattingController.hasListener) {
+      webSocketUtils.chattingController.stream.listen((data) {
+        print('chatting页面:$data');
+        var model = ChatModel.fromJson(data);
+        if (model.code == 210) {
+          //自己发的
+          if (!chatMapMsg.containsKey(model.chatMsg.first.toId)) {
+            chatMapMsg[model.chatMsg.first.toId] = [];
           }
-          chatMapMsg[f.userId].add(f);
-          dataBaseManager.insertChatMsg(f.userId, f.toId, f.msg, f.sign);
-        });
-      }
+          chatMapMsg[model.chatMsg.first.toId].add(model.chatMsg.first);
+          dataBaseManager.insertChatMsg(
+              model.chatMsg.first.userId,
+              model.chatMsg.first.toId,
+              model.chatMsg.first.msg,
+              model.chatMsg.first.sign);
+        }
+        if (model.code == 220) {
+          //收到的
+          if (!chatMapMsg.containsKey(model.chatMsg.first.userId)) {
+            chatMapMsg[model.chatMsg.first.userId] = [];
+          }
+          chatMapMsg[model.chatMsg.first.userId].add(model.chatMsg.first);
+          dataBaseManager.insertChatMsg(
+              model.chatMsg.first.userId,
+              model.chatMsg.first.toId,
+              model.chatMsg.first.msg,
+              model.chatMsg.first.sign);
+        }
+        //历史消息
+        if (model.code == 215) {
+          model.chatMsg.forEach((f) {
+            f.sign = 2;
+            print('sign:${f.sign}');
+            if (!chatMapMsg.containsKey(f.userId)) {
+              chatMapMsg[f.userId] = [];
+            }
+            chatMapMsg[f.userId].add(f);
+            dataBaseManager.insertChatMsg(f.userId, f.toId, f.msg, f.sign);
+          });
+        }
 
-      notifyListeners();
-    });
+        notifyListeners();
+      });
+    }
   }
 
   @override
@@ -149,18 +165,19 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
     return null;
   }
 
+  void deleteChatter(String toId) {
+    webSocketUtils.deleteChatter(toId);
+  }
+
   @override
   Future loading() {
-    print(webSocketUtils.isOk);
-    if (webSocketUtils.isOk) {
-      webSocketUtils.getChatters();
-      webSocketUtils.getHistoryMessage();
-    } else {
-      webSocketUtils.resetConnect();
-      webSocketUtils.getChatters();
-      webSocketUtils.getHistoryMessage();
+    if (Api.token.isEmpty) {
+      showToast('你还没登录呢');
+      return null;
     }
-
+    webSocketUtils.startConnect();
+    webSocketUtils.getChatters();
+    webSocketUtils.getHistoryMessage();
     return null;
   }
 }

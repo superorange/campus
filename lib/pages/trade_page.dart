@@ -7,6 +7,7 @@ import 'package:flutter_app/pages/vm/trade_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/base_utils.dart';
 import 'package:flutter_app/utils/screen_config.dart';
+import 'package:flutter_app/widget/image_error.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -110,13 +111,15 @@ class _TradePageState extends State<TradePage>
                             SizedBox(
                               height: setHeight(30),
                             ),
-                            Text(
-                              '嗨！${Provider.of<PersonPageVm>(context, listen: false).user?.userName ?? '游客'}',
-                              style: TextStyle(
-                                  fontSize: 27,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                            ),
+                            Consumer<PersonPageVm>(builder: (context, vm, _) {
+                              return Text(
+                                '嗨！${vm.user?.userName ?? '游客'}',
+                                style: TextStyle(
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                              );
+                            }),
                             SizedBox(
                               height: setHeight(10),
                             ),
@@ -298,6 +301,13 @@ class _TradePageState extends State<TradePage>
                                     ),
                                     child: InkWell(
                                       onTap: () {
+                                        if (Provider.of<PersonPageVm>(context,
+                                                    listen: false)
+                                                .user ==
+                                            null) {
+                                          showToast('登录后即可查看更多哟');
+                                          return;
+                                        }
                                         Navigator.pushNamed(context,
                                             RouteName.tradeInformationPage,
                                             arguments:
@@ -319,15 +329,11 @@ class _TradePageState extends State<TradePage>
                                                 fit: BoxFit.cover,
                                                 imageUrl:
                                                     '${vm.goodsListModel.goodsModel[index].gImages.first}',
-                                                errorWidget: (context, s, o) =>
-                                                    Center(
-                                                  child: Text('s:$s,0:$o'),
-                                                ),
+                                                errorWidget: (context, s, _) =>
+                                                    ImageErrorWidget(),
                                                 fadeInCurve: Curves.easeIn,
                                                 placeholder: (context, s) =>
-                                                    Center(
-                                                  child: Text('s:$s'),
-                                                ),
+                                                    CupertinoActivityIndicator(),
                                               ),
                                             ),
                                           )),
@@ -370,7 +376,26 @@ class _TradePageState extends State<TradePage>
                                               children: <Widget>[
                                                 Flexible(
                                                   child: Container(
-                                                    child: CircleAvatar(),
+                                                    margin: EdgeInsets.only(
+                                                        left: 2),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              36),
+                                                      child: CachedNetworkImage(
+                                                        fit: BoxFit.cover,
+                                                        imageUrl:
+                                                            '${vm.goodsListModel.goodsModel[index].headPic}',
+                                                        errorWidget: (context,
+                                                                s, _) =>
+                                                            ImageErrorWidget(),
+                                                        fadeInCurve:
+                                                            Curves.easeIn,
+                                                        placeholder: (context,
+                                                                s) =>
+                                                            CupertinoActivityIndicator(),
+                                                      ),
+                                                    ),
                                                   ),
                                                   flex: 1,
                                                 ),
@@ -387,7 +412,7 @@ class _TradePageState extends State<TradePage>
                                                               .center,
                                                       children: <Widget>[
                                                         Text(
-                                                          '${vm.goodsListModel.goodsModel[index].userId}',
+                                                          '${vm.goodsListModel.goodsModel[index].userName}',
                                                           style: TextStyle(
                                                             color: Colors.black,
                                                           ),
@@ -426,7 +451,8 @@ class _TradePageState extends State<TradePage>
                                         2, index.isEven ? 3 : 4),
                                 mainAxisSpacing: 6,
                                 crossAxisSpacing: 8,
-                                itemCount: vm.goodsListModel.goodsModel.length,
+                                itemCount:
+                                    vm.goodsListModel?.goodsModel?.length ?? 0,
                               )),
                       vm.goodsListModel == null
                           ? SliverToBoxAdapter(
@@ -457,9 +483,7 @@ class MyHeader extends SliverPersistentHeaderDelegate {
     return Container(
       height: 55,
       width: double.infinity,
-      padding: EdgeInsets.only(
-        left: 20,
-      ),
+      padding: EdgeInsets.only(left: 20, right: 20),
       decoration: BoxDecoration(
         color: Colors.white,
       ),
@@ -480,25 +504,22 @@ class MyHeader extends SliverPersistentHeaderDelegate {
                 }),
           ),
           Flexible(
-            child: Padding(
-              padding: EdgeInsets.only(right: 20),
-              child: Consumer<TradeVm>(builder: (context, vm, _) {
-                return InkWell(
-                  onTap: () {
-                    if (focusNode.hasFocus) {
-                      focusNode.unfocus();
-                    }
-                    Navigator.pushNamed(context, RouteName.tradeListPage,
-                        arguments: {'gName': textEditingController.text ?? ""});
-                  },
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.grey,
-                  ),
-                );
-              }),
-            ),
-            flex: 1,
+            child: Consumer<TradeVm>(builder: (context, vm, _) {
+              return InkWell(
+                onTap: () {
+                  if (focusNode.hasFocus) {
+                    focusNode.unfocus();
+                  }
+                  Navigator.pushNamed(context, RouteName.tradeListPage,
+                      arguments: {'gName': textEditingController.text ?? ""});
+                },
+                child: Icon(
+                  Icons.search,
+                  color: Colors.grey,
+                ),
+              );
+            }),
+            flex: 2,
           ),
         ],
       ),

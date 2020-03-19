@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/model/chat_data_model.dart';
@@ -20,6 +21,38 @@ class _ChatPageState extends State<ChatPage> {
   TextEditingController textEditingController = TextEditingController();
   ScrollController scrollController = ScrollController();
   ChatDataModel chatDataModel;
+  Widget imageHead;
+  Connectivity _connectivity = Connectivity();
+
+  int msgLength = 0;
+  @override
+  void initState() {
+    _connectivity.onConnectivityChanged.listen((res) {
+      if (res == ConnectivityResult.wifi || res == ConnectivityResult.mobile) {
+        Provider.of<ChatChattersPageVm>(context, listen: false).startConnect();
+      }
+    });
+    chatDataModel = ChatDataModel.fromJson(widget.argus);
+    imageHead = CachedNetworkImage(
+      errorWidget: (context, s, _) => Container(
+        color: Colors.yellow,
+      ),
+      imageUrl: chatDataModel.headPic,
+      fit: BoxFit.cover,
+    );
+    print('toId:${chatDataModel.toId}');
+    Provider.of<ChatChattersPageVm>(context, listen: false)
+      ..setInitData(chatDataModel.toId)
+      ..addChatter(chatDataModel.toId);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
   Widget chatPosition(bool b, String msg) {
     if (b) {
       return Row(
@@ -32,13 +65,7 @@ class _ChatPageState extends State<ChatPage> {
             padding: EdgeInsets.only(right: 10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(3),
-              child: CachedNetworkImage(
-                errorWidget: (context, s, _) => Container(
-                  color: Colors.yellow,
-                ),
-                imageUrl: chatDataModel.headPic,
-                fit: BoxFit.cover,
-              ),
+              child: imageHead,
             ),
           ),
           Expanded(
@@ -84,35 +111,11 @@ class _ChatPageState extends State<ChatPage> {
           padding: EdgeInsets.only(left: 10),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(3),
-            child: CachedNetworkImage(
-              errorWidget: (context, s, _) => Container(
-                color: Colors.yellow,
-              ),
-              imageUrl: chatDataModel.headPic,
-              fit: BoxFit.cover,
-            ),
+            child: imageHead,
           ),
         ),
       ],
     );
-  }
-
-  @override
-  void initState() {
-    chatDataModel = ChatDataModel.fromJson(widget.argus);
-    Provider.of<ChatChattersPageVm>(context, listen: false)
-        .setInitData(chatDataModel.userId);
-    scrollController.addListener(() {
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
   }
 
   @override
@@ -128,6 +131,10 @@ class _ChatPageState extends State<ChatPage> {
           elevation: 0.5,
         ),
         body: Consumer<ChatChattersPageVm>(builder: (context, vm, _) {
+//          if (scrollController.hasClients) {
+//            print(scrollController.position.pixels);
+////            scrollController.jumpTo();
+//          }
           return Column(
             children: <Widget>[
               Expanded(
@@ -136,22 +143,21 @@ class _ChatPageState extends State<ChatPage> {
                           physics: BouncingScrollPhysics(),
                           controller: scrollController,
                           itemCount:
-                              vm.chatMapMsg[chatDataModel.userId]?.length ?? 0,
+                              vm.chatMapMsg[chatDataModel.toId]?.length ?? 0,
                           itemBuilder: (context, index) {
                             return Container(
                               margin: EdgeInsets.only(
                                   left: 10, right: 10, bottom: 10),
                               alignment: vm
-                                      .chatMapMsg[chatDataModel.userId][index]
+                                      .chatMapMsg[chatDataModel.toId][index]
                                       .sign
                                       .isEven
                                   ? Alignment.centerLeft
                                   : Alignment.centerRight,
                               child: chatPosition(
-                                  vm.chatMapMsg[chatDataModel.userId][index]
-                                      .sign.isEven,
-                                  vm.chatMapMsg[chatDataModel.userId][index]
-                                      .msg),
+                                  vm.chatMapMsg[chatDataModel.toId][index].sign
+                                      .isEven,
+                                  vm.chatMapMsg[chatDataModel.toId][index].msg),
                             );
                           }))),
               Container(
@@ -191,7 +197,7 @@ class _ChatPageState extends State<ChatPage> {
                           onPressed: () {
                             if (textEditingController.text.isNotEmpty) {
                               vm.sendMsg(textEditingController.text,
-                                  chatDataModel.userId);
+                                  chatDataModel.toId);
                               textEditingController.clear();
                             }
                           }),

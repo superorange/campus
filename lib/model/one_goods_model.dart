@@ -1,36 +1,4 @@
-class GoodsListModel {
-  int code;
-  String msg;
-  String token;
-  List<GoodsModel> goodsModel;
-
-  GoodsListModel({this.code, this.msg, this.token, this.goodsModel});
-
-  GoodsListModel.fromJson(Map<String, dynamic> json) {
-    code = json['code'];
-    msg = json['msg'];
-    token = json['token'];
-    if (json['data'] != null) {
-      goodsModel = new List<GoodsModel>();
-      json['data'].forEach((v) {
-        goodsModel.add(new GoodsModel.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['code'] = this.code;
-    data['msg'] = this.msg;
-    data['token'] = this.token;
-    if (this.goodsModel != null) {
-      data['data'] = this.goodsModel.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class GoodsModel {
+class OneGoodsModel {
   int id;
   String userId;
   String userName;
@@ -46,8 +14,10 @@ class GoodsModel {
   String schoolLocation;
   String category;
   String sign;
+  bool gCollection;
+  bool uCollection;
 
-  GoodsModel(
+  OneGoodsModel(
       {this.id,
       this.userId,
       this.userName,
@@ -62,9 +32,11 @@ class GoodsModel {
       this.commentsId,
       this.schoolLocation,
       this.category,
-      this.sign});
+      this.sign,
+      this.gCollection,
+      this.uCollection});
 
-  GoodsModel.fromJson(Map<String, dynamic> json) {
+  OneGoodsModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['userId'];
     userName = json['userName'];
@@ -80,6 +52,8 @@ class GoodsModel {
     schoolLocation = json['schoolLocation'];
     category = json['category'];
     sign = json['sign'];
+    gCollection = json['gCollection'];
+    uCollection = json['uCollection'];
   }
 
   Map<String, dynamic> toJson() {
@@ -99,6 +73,8 @@ class GoodsModel {
     data['schoolLocation'] = this.schoolLocation;
     data['category'] = this.category;
     data['sign'] = this.sign;
+    data['gCollection'] = this.gCollection;
+    data['uCollection'] = this.uCollection;
     return data;
   }
 }

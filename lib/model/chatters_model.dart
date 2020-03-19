@@ -34,17 +34,17 @@ class Chatters {
   int id;
   String userId;
   String toId;
-  int createTime;
+  String createTime;
   String userName;
   String headPic;
 
   Chatters(
       {this.id,
-        this.userId,
-        this.toId,
-        this.createTime,
-        this.userName,
-        this.headPic});
+      this.userId,
+      this.toId,
+      this.createTime,
+      this.userName,
+      this.headPic});
 
   Chatters.fromJson(Map<String, dynamic> json) {
     id = json['id'];

@@ -35,4 +35,36 @@ class UserService extends BaseService {
       throw e;
     });
   }
+
+  Future<Response> updateUser({@required var data}) {
+    return dio.put(Api.user, data: data).then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
+
+  Future<Response> userCollection({@required var data}) {
+    return dio.get(Api.userCollection, queryParameters: data).then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
+
+  Future<Response> goodsCollection({@required var data}) {
+    return dio.get(Api.goodsCollection, queryParameters: data).then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
+
+  Future<Response> goodsReport({@required var data}) {
+    return dio.get(Api.goodsReport, queryParameters: data).then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
 }

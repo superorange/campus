@@ -1,6 +1,6 @@
 abstract class BaseVm {
-  int pageIndex = 1;
-  bool netState;
+  int pageIndex = 0;
+  bool netState = true;
   Future loading();
   Future loadMore();
 }

@@ -16,13 +16,11 @@ class PwdLoginVm with ChangeNotifier {
     _username = username;
     if (_username.length >= 6 && _password.length >= 6) {
       if (!_permitLogin) {
-        print('刷新！');
         _permitLogin = true;
         notifyListeners();
       }
     } else {
       if (_permitLogin) {
-        print('刷新！');
         _permitLogin = false;
         notifyListeners();
       }
@@ -33,13 +31,11 @@ class PwdLoginVm with ChangeNotifier {
     _password = password;
     if (_username.length >= 6 && _password.length >= 6) {
       if (!_permitLogin) {
-        print('刷新！');
         _permitLogin = true;
         notifyListeners();
       }
     } else {
       if (_permitLogin) {
-        print('刷新！');
         _permitLogin = false;
         notifyListeners();
       }

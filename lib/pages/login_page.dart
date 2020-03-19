@@ -73,9 +73,16 @@ class _LoginPageState extends State<LoginPage>
               child: Container(
                 height: 140,
                 width: 140,
-                child: CircleAvatar(
-                  foregroundColor: Colors.blueAccent,
-                  backgroundImage: AssetImage('assets/images/logo.png'),
+//                child: CircleAvatar(
+//                  foregroundColor: Colors.blueAccent,
+//                  backgroundImage: AssetImage('assets/images/logo.png'),
+//                ),
+                child: Text(
+                  '校园二手交易',
+                  style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22),
                 ),
               ),
             ),
@@ -88,6 +95,9 @@ class _LoginPageState extends State<LoginPage>
                 padding: EdgeInsets.only(left: 40, right: 40),
                 alignment: Alignment.center,
                 child: ChooseLoginPanel(),
+              ),
+              SizedBox(
+                height: 50,
               ),
             ],
           )),
@@ -555,155 +565,153 @@ class PwdLogin extends StatelessWidget {
       value: pwdLoginVm,
       child: Scaffold(
         backgroundColor: Colors.white,
-        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           automaticallyImplyLeading: true,
           elevation: .0,
         ),
-        body: Consumer<PwdLoginVm>(builder: (context, vm, _) {
-          return Padding(
-              padding:
-                  EdgeInsets.only(top: setHeight(300), left: 40, right: 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        letterSpacing: 2,
-                        foreground: Paint()..shader = shader,
-                        fontSize: 38,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: setHeight(30),
-                  ),
-                  Container(
-                    height: 50,
-                    padding: EdgeInsets.only(left: 10),
-                    color: Colors.grey[200],
-                    child: TextField(
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        hintText: '手机号',
-                        suffixIcon: Icon(
-                          CupertinoIcons.person,
-                          color: Colors.blue,
-                        ),
-                        border: InputBorder.none,
-                      ),
-                      inputFormatters: [
-                        WhitelistingTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(11)
-                      ],
-                      controller: _idController,
-                      focusNode: _idFocusNode,
-                      onChanged: (value) {
-                        vm.username = value;
-                      },
-                      onEditingComplete: () {
-                        Focus.of(context).requestFocus(_pwdFocusNode);
-                      },
-                    ),
-                  ),
-                  Container(
-                    height: 50,
-                    color: Colors.grey[200],
-                    padding: EdgeInsets.only(left: 10),
-                    margin: EdgeInsets.only(top: setHeight(20)),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: '输入密码',
-                        suffixIcon: Icon(
-                          CupertinoIcons.padlock,
-                          color: Colors.blue,
-                        ),
-                        border: InputBorder.none,
-                      ),
-                      obscureText: true,
-                      controller: _pwdController,
-                      focusNode: _pwdFocusNode,
-                      onChanged: (value) {
-                        vm.password = value;
-                      },
-                      onEditingComplete: () {
-                        _pwdFocusNode.unfocus();
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: setHeight(20),
-                  ),
-                  Container(
-                    height: 30,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+        body: SingleChildScrollView(
+          child: Consumer<PwdLoginVm>(builder: (context, vm, _) {
+            return Padding(
+                padding:
+                    EdgeInsets.only(top: setHeight(300), left: 40, right: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                          letterSpacing: 2,
+                          foreground: Paint()..shader = shader,
+                          fontSize: 38,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: setHeight(20),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: FlatButton(
-                        color: Colors.blueAccent,
-                        onPressed: vm.permitLogin
-                            ? () {
-                                vm.loginProcess = true;
-                                _pwdFocusNode.unfocus();
-                                _idFocusNode.unfocus();
-                                UserService()
-                                    .pwdLogin(data: vm.getData().toJson())
-                                    .then((val) {
-                                  print('data:${vm.getData()}');
-                                  BaseModel model =
-                                      BaseModel.fromJson(val.data);
-                                  if (model.code == 200) {
-                                    var user = UserModel.fromJson(model.data);
-
-                                    UserDataBase()
-                                        .insertUser(user, model.token);
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        RouteName.index,
-                                        ModalRoute.withName('/'));
-                                  } else {
+                    SizedBox(
+                      height: setHeight(30),
+                    ),
+                    Container(
+                      height: 50,
+                      padding: EdgeInsets.only(left: 10),
+                      color: Colors.grey[200],
+                      child: TextField(
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: '手机号',
+                          suffixIcon: Icon(
+                            CupertinoIcons.person,
+                            color: Colors.blue,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        inputFormatters: [
+                          WhitelistingTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(11)
+                        ],
+                        controller: _idController,
+                        focusNode: _idFocusNode,
+                        onChanged: (value) {
+                          vm.username = value;
+                        },
+                        onEditingComplete: () {
+                          Focus.of(context).requestFocus(_pwdFocusNode);
+                        },
+                      ),
+                    ),
+                    Container(
+                      height: 50,
+                      color: Colors.grey[200],
+                      padding: EdgeInsets.only(left: 10),
+                      margin: EdgeInsets.only(top: setHeight(20)),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: '输入密码',
+                          suffixIcon: Icon(
+                            CupertinoIcons.padlock,
+                            color: Colors.blue,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        obscureText: true,
+                        controller: _pwdController,
+                        focusNode: _pwdFocusNode,
+                        onChanged: (value) {
+                          vm.password = value;
+                        },
+                        onEditingComplete: () {
+                          _pwdFocusNode.unfocus();
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: setHeight(20),
+                    ),
+                    Container(
+                      height: 30,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: setHeight(20),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: FlatButton(
+                          color: Colors.blueAccent,
+                          onPressed: vm.permitLogin
+                              ? () {
+                                  vm.loginProcess = true;
+                                  _pwdFocusNode.unfocus();
+                                  _idFocusNode.unfocus();
+                                  UserService().pwdLogin(data: {
+                                    'phone': _idController.text,
+                                    'password': _pwdController.text
+                                  }).then((val) {
+                                    BaseModel model =
+                                        BaseModel.fromJson(val.data);
+                                    if (model.code == 200) {
+                                      var user = UserModel.fromJson(model.data);
+                                      UserDataBase()
+                                          .insertUser(user, model.token);
+                                      Navigator.pushNamedAndRemoveUntil(context,
+                                          RouteName.index, (route) => false);
+                                    } else {
+                                      showToast('手机号/密码错误');
+                                      vm.loginProcess = false;
+                                    }
+                                  }, onError: (e) {
                                     showToast('手机号/密码错误');
                                     vm.loginProcess = false;
-                                  }
-                                }, onError: (e) {
-                                  showToast('手机号/密码错误');
-                                  vm.loginProcess = false;
-                                });
-                              }
-                            : null,
-                        child: Container(
-                            height: 50,
-                            alignment: Alignment.center,
-                            child: vm.loginProcess
-                                ? CupertinoActivityIndicator()
-                                : Text(
-                                    '登录',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 17),
-                                  ))),
-                  ),
-                ],
-              ));
-        }),
+                                  });
+                                }
+                              : null,
+                          child: Container(
+                              height: 50,
+                              alignment: Alignment.center,
+                              child: vm.loginProcess
+                                  ? CupertinoActivityIndicator()
+                                  : Text(
+                                      '登录',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 17),
+                                    ))),
+                    ),
+                  ],
+                ));
+          }),
+        ),
       ),
     );
   }

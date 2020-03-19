@@ -1,14 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/font/font_style.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
-import 'package:flutter_app/utils/base_utils.dart';
-import 'package:flutter_app/utils/global_config.dart';
 import 'package:flutter_app/utils/screen_config.dart';
+import 'package:flutter_app/widget/image_error.dart';
+import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_app/widget/tab_widget.dart';
 import 'package:flutter_easyrefresh/bezier_circle_header.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
@@ -21,24 +23,7 @@ class _PersonPageState extends State<PersonPage>
     with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
-    validate();
     super.initState();
-  }
-
-  void validate() async {
-    if (GlobalConfig().initAllisOk) {
-      Provider.of<PersonPageVm>(context, listen: false).loading().then((val) {
-        if (val == LoginState.LoginFailed) {
-          showToast('登录过期，请重新登录',
-              duration: Duration(seconds: 5),
-              backgroundColor: Colors.black,
-              textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold));
-        }
-      });
-    }
   }
 
   @override
@@ -49,7 +34,6 @@ class _PersonPageState extends State<PersonPage>
         removeTop: true,
         child: Scaffold(
           body: Consumer<PersonPageVm>(builder: (context, vm, _) {
-            print('model:${vm.user}');
             if (vm.user == null) {
               return Material(
                 child: Center(
@@ -70,14 +54,14 @@ class _PersonPageState extends State<PersonPage>
                 child: ListView(
                   children: <Widget>[
                     Container(
-                      height: 320,
+                      height: 340,
                       width: double.infinity,
                       child: Stack(
                         children: <Widget>[
                           Column(
                             children: <Widget>[
                               Container(
-                                height: 260,
+                                height: 290,
                                 decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                   begin: Alignment.centerLeft,
@@ -101,13 +85,55 @@ class _PersonPageState extends State<PersonPage>
                                   '个人中心',
                                   style: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 20),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22),
                                 ),
                                 const SizedBox(
                                   height: 25,
                                 ),
-                                CircleAvatar(),
+                                InkWell(
+                                  onTap: () async {
+                                    List<Asset> headPic;
+                                    try {
+                                      headPic =
+                                          await MultiImagePicker.pickImages(
+                                              maxImages: 1, enableCamera: true);
+                                    } catch (e) {
+                                      return;
+                                    }
+                                    showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (ctx) {
+                                          vm
+                                              .updateImage(headPic.first)
+                                              .then((val) {
+                                            if (!val) {
+                                              showToast('上传失败，请重试');
+                                            }
+                                            Navigator.pop(context);
+                                          });
+                                          return LoadingWidget(
+                                            ctx,
+                                            canRemove: false,
+                                          );
+                                        });
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(7),
+                                    child: CachedNetworkImage(
+                                      imageUrl: vm.user.headPic,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (c, s, _) =>
+                                          ImageErrorWidget(),
+                                      placeholder: (c, s) => Center(
+                                        child: CupertinoActivityIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 const SizedBox(
                                   height: 15,
                                 ),
@@ -118,8 +144,15 @@ class _PersonPageState extends State<PersonPage>
                                               context: context,
                                               builder: (context) {
                                                 return ModifyInformationWidget(
-                                                    '修改用户名', '请输入新用户名', (val) {
-                                                  print('v:$val');
+                                                    '修改用户名', '请输入新用户名',
+                                                    onCancel: () {
+                                                  Navigator.pop(context);
+                                                }, onClick: (val) {
+                                                  vm.updateUser({
+                                                    'type': 'userName',
+                                                    'userName': val
+                                                  });
+                                                  Navigator.pop(context);
                                                 });
                                               });
                                         }
@@ -263,9 +296,14 @@ class _PersonPageState extends State<PersonPage>
                         showDialog(
                             context: context,
                             builder: (context) {
-                              return ModifyInformationWidget('修改密码', '请输入新密码',
-                                  (val) {
-                                print('v:$val');
+                              return ModifyDoubleWidget(
+                                  '修改密码', '请输入旧密码', '请输入新密码', (val) {
+                                vm.updateUser({
+                                  'type': 'password',
+                                  'password': val[1],
+                                  'oldPassword': val[0]
+                                });
+                                Navigator.pop(context);
                               });
                             });
                       },
@@ -277,20 +315,99 @@ class _PersonPageState extends State<PersonPage>
                           child: InformationWidget(
                               a: Text('密码修改',
                                   style: AppStyle.personPageInformationStyle()),
-                              b: Text('密码178天没有修改啦'),
+                              b: Text(''),
                               c: Icon(Icons.lock))),
                     ),
                     Divider(),
-                    Container(
-                        height: setHeight(60),
-                        padding: EdgeInsets.only(
-                            left: setWidth(25), right: setWidth(25)),
-                        width: double.infinity,
-                        child: InformationWidget(
-                            a: Text('上课提醒',
-                                style: AppStyle.personPageInformationStyle()),
-                            b: Text('今天有5节课'),
-                            c: Icon(Icons.notifications_none))),
+//                    Container(
+//                        height: setHeight(60),
+//                        padding: EdgeInsets.only(
+//                            left: setWidth(25), right: setWidth(25)),
+//                        width: double.infinity,
+//                        child: InformationWidget(
+//                            a: Text('上课提醒',
+//                                style: AppStyle.personPageInformationStyle()),
+//                            b: Text('今天有5节课'),
+//                            c: Icon(Icons.notifications_none))),
+//                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ModifyInformationWidget('修改用户名', '请输入新用户名',
+                                  onCancel: () {
+                                Navigator.pop(context);
+                              }, onClick: (val) {
+                                vm.updateUser(
+                                    {'type': 'userName', 'userName': val});
+                                Navigator.pop(context);
+                              });
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('修改用户名',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Container(),
+                              c: Icon(Icons.sort))),
+                    ),
+                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ModifyInformationWidget('修改手机号', '请输入新手机号',
+                                  onCancel: () {
+                                Navigator.pop(context);
+                              }, onClick: (val) {
+                                vm.updateUser({'type': 'phone', 'phone': val});
+                                Navigator.pop(context);
+                              });
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('修改手机号',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Container(),
+                              c: Icon(Icons.phone))),
+                    ),
+                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ModifyInformationWidget(
+                                  '修改个性签名', '请输入新个性签名', onCancel: () {
+                                Navigator.pop(context);
+                              }, onClick: (val) {
+                                vm.updateUser({'type': 'sign', 'sign': val});
+                                Navigator.pop(context);
+                              });
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('修改个性签名',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Container(),
+                              c: Icon(Icons.border_color))),
+                    ),
                     Divider(),
                     Container(
                         height: setHeight(60),
@@ -391,7 +508,9 @@ class ModifyInformationWidget extends StatelessWidget {
   String title;
   String hintText;
   Function onClick;
-  ModifyInformationWidget(this.title, this.hintText, this.onClick);
+  Function onCancel;
+  ModifyInformationWidget(this.title, this.hintText,
+      {this.onCancel, this.onClick});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -401,6 +520,51 @@ class ModifyInformationWidget extends StatelessWidget {
         decoration: InputDecoration(hintText: '$hintText'),
       ),
       actions: <Widget>[
+        FlatButton(onPressed: () => onCancel(), child: Text('取消')),
+        FlatButton(
+            onPressed: () {
+              if (_textEditingController.text.length >= 4 &&
+                  _textEditingController.text.length <= 12) {
+                onClick(_textEditingController.text);
+                return;
+              }
+              showToast('参数不合法');
+            },
+            child: Text('确定')),
+      ],
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class ModifyDoubleWidget extends StatelessWidget {
+  TextEditingController _textEditingController1 = TextEditingController();
+  TextEditingController _textEditingController2 = TextEditingController();
+  String title;
+  String hintText1;
+  String hintText2;
+  Function onClick;
+  ModifyDoubleWidget(this.title, this.hintText1, this.hintText2, this.onClick);
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('$title'),
+      content: Container(
+        height: 100,
+        child: Column(
+          children: <Widget>[
+            TextField(
+              controller: _textEditingController1,
+              decoration: InputDecoration(hintText: '$hintText1'),
+            ),
+            TextField(
+              controller: _textEditingController2,
+              decoration: InputDecoration(hintText: '$hintText2'),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
         FlatButton(
             onPressed: () {
               Navigator.pop(context);
@@ -408,10 +572,14 @@ class ModifyInformationWidget extends StatelessWidget {
             child: Text('取消')),
         FlatButton(
             onPressed: () {
-              if (_textEditingController.text.length >= 4 &&
-                  _textEditingController.text.length <= 12) {
-                onClick(_textEditingController.text);
-                Navigator.pop(context);
+              if (_textEditingController1.text.length >= 4 &&
+                  _textEditingController1.text.length <= 12 &&
+                  _textEditingController2.text.length >= 4 &&
+                  _textEditingController2.text.length <= 12) {
+                onClick([
+                  _textEditingController1.text,
+                  _textEditingController2.text
+                ]);
                 return;
               }
               showToast('参数不合法');

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/pages/vm/trade_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/base_utils.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_app/utils/screen_config.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
@@ -49,7 +51,7 @@ class _TradeListPageState extends State<TradeListPage> {
                 width: double.infinity,
                 height: double.infinity,
                 child: Consumer<TradeVm>(builder: (context, vm, _) {
-                  if (vm.goodsListModel == null && vm.netState == null) {
+                  if (vm.goodsListModel == null && vm.netState) {
                     vm.loading(gName: searchValue).catchError((_) {});
                     return LoadingWidget(
                       context,
@@ -156,6 +158,13 @@ class _TradeListPageState extends State<TradeListPage> {
                               Container(
                                   child: InkWell(
                             onTap: () {
+                              if (Provider.of<PersonPageVm>(context,
+                                          listen: false)
+                                      .user ==
+                                  null) {
+                                showToast('登录后即可查看更多哟');
+                                return;
+                              }
                               Navigator.pushNamed(
                                   context, RouteName.tradeInformationPage,
                                   arguments:
@@ -287,7 +296,7 @@ class _TradeListPageState extends State<TradeListPage> {
                           onPressed: () => Navigator.pop(context)),
                       Container(
                         height: 40,
-                        width: 250,
+                        width: 200,
                         padding: EdgeInsets.only(left: 20, right: 20),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(

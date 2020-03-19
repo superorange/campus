@@ -11,7 +11,8 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GlobalConfig().initGlobalConfig();
+  var t = await GlobalConfig().initGlobalConfig();
+  print('初始化状态$t');
   runApp(MyApp());
 }
 
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
             textTheme: TextTheme(
                 subhead: TextStyle(textBaseline: TextBaseline.alphabetic)),

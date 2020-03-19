@@ -8,34 +8,28 @@ import 'package:web_socket_channel/io.dart';
 class WebSocketUtils {
   WebSocketUtils._init();
   static WebSocketUtils _webSocketUtils;
-  StreamController chattersController = StreamController.broadcast();
-  StreamController chattingController = StreamController.broadcast();
+  StreamController chattersController;
+  StreamController chattingController;
   IOWebSocketChannel _channel;
-  StreamSubscription _subscription;
-  bool isOk = false;
-  void startConnect() async {
+  IOWebSocketChannel get channel => _channel;
+  void startConnect() {
     if (_channel == null) {
+      chattersController = StreamController.broadcast();
+      chattingController = StreamController.broadcast();
       _channel = IOWebSocketChannel.connect(
-        Api.socketUrl + Api.chat,
+        Api.ws + Api.chat,
         headers: {'Authorization': Api.token},
       );
-      _subscription = _channel.stream.listen(_handleData, onDone: _socketDone,
-          onError: (e, s) {
-        showToast('网络错误');
-        isOk = false;
-        _subscription.cancel();
+      _channel.stream.listen(_handleData, onDone: () {
+        _channel = null;
+      }, onError: (e, s) {
+        _channel = null;
+        showToast('失去网络连接');
       }, cancelOnError: true);
     }
   }
 
-  void _socketDone() {
-    isOk = false;
-    _subscription.cancel();
-  }
-
   void _handleData(dynamic data) {
-    print('处理！');
-    if (!isOk) isOk = true;
     var jsonData = jsonDecode(data);
     if (jsonData['type'] == 'chatting') {
       chattingController.add(jsonData);
@@ -45,33 +39,58 @@ class WebSocketUtils {
     }
   }
 
-  void resetConnect() {
-    _channel = IOWebSocketChannel.connect(
-      Api.socketUrl + Api.chat,
-      headers: {'Authorization': Api.token},
-    );
-    _subscription = _channel.stream.listen(_handleData, onDone: _socketDone,
-        onError: (e, s) {
-      showToast('网络错误');
-      isOk = false;
-      _subscription.cancel();
-    }, cancelOnError: true);
-  }
-
   void getChatters() {
+    if (_channel == null) {
+      startConnect();
+      if (_channel != null) {
+        _channel.sink.add(jsonEncode({
+          'code': 202,
+        }));
+      }
+      return;
+    }
     _channel.sink.add(jsonEncode({
       'code': 202,
     }));
   }
 
   dispose() {
-    isOk = false;
-    _subscription.cancel();
+    chattersController.close();
+    chattingController.close();
     _channel = null;
   }
 
   void sendData(String msg, String toId) {
+    if (_channel == null) {
+      startConnect();
+      if (_channel != null) {
+        _channel.sink.add(jsonEncode({'code': 200, 'toId': toId, 'msg': msg}));
+      }
+      return;
+    }
     _channel.sink.add(jsonEncode({'code': 200, 'toId': toId, 'msg': msg}));
+  }
+
+  void createNewChatter(String toId) {
+    if (_channel == null) {
+      startConnect();
+      if (_channel != null) {
+        _channel.sink.add(jsonEncode({'code': 201, 'toId': toId}));
+      }
+      return;
+    }
+    _channel.sink.add(jsonEncode({'code': 201, 'toId': toId}));
+  }
+
+  void deleteChatter(String toId) {
+    if (_channel == null) {
+      startConnect();
+      if (_channel != null) {
+        _channel.sink.add(jsonEncode({'code': 208, 'toId': toId}));
+      }
+      return;
+    }
+    _channel.sink.add(jsonEncode({'code': 208, 'toId': toId}));
   }
 
   void getHistoryMessage() {
@@ -82,8 +101,5 @@ class WebSocketUtils {
 
   factory WebSocketUtils() {
     return _webSocketUtils ??= WebSocketUtils._init();
-  }
-  void createNewChatter(String toId) {
-//    _channel.sink.add(jsonEncode(CreateConnectModel.toJson(toId)));
   }
 }

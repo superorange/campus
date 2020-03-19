@@ -4,6 +4,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/model/base_model.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/service/goods_service.dart';
@@ -1371,13 +1372,12 @@ class _UploadPageState extends State<UploadPage> {
 }
 
 class QiNiu {
-  static Dio dio;
+  static Dio dio = Dio(BaseOptions(contentType: 'multipart/form-data'));
 
   uploadImages(List<Asset> images, String token,
       {UploadProgress uploadProgress,
       UploadResult uploadResult,
       UploadSize uploadSize}) async {
-    dio = Dio(BaseOptions(contentType: 'multipart/form-data'));
     List<FormData> dataList = [];
     images.forEach((image) async {
       var name = image.name;
@@ -1392,8 +1392,8 @@ class QiNiu {
         int i = 0;
         Future run() async {
           if (i < dataList.length) {
-            return await dio.post('http://upload-z2.qiniup.com',
-                data: dataList[i], onSendProgress: (c, t) {
+            return await dio.post(Api.qiNiu, data: dataList[i],
+                onSendProgress: (c, t) {
               uploadProgress(i + 1, c / t);
             }).then((val) {
               uploadResult(val);
@@ -1412,6 +1412,19 @@ class QiNiu {
         run();
       }
     });
+  }
+
+  Future<String> uploadImage(Asset image, String token) async {
+    var byte = await image.getByteData();
+    FormData data = FormData.fromMap({
+      'token': token,
+      'fileName': image.name,
+      'file': MultipartFile.fromBytes(byte.buffer.asUint8List()),
+    });
+    var result = await dio.post(Api.qiNiu, data: data).catchError((e) {
+      return null;
+    });
+    return result?.data['hash'];
   }
 
   uploadCancel() {
