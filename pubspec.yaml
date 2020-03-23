@@ -42,6 +42,7 @@ dependencies:
   hive_flutter: ^0.3.0+2
   synchronized: ^2.2.0
   flutter_slidable: ^0.5.4
+  lottie: ^0.3.2
 
 
 
@@ -74,6 +75,7 @@ flutter:
     - assets/svg/
     - assets/pem/public.pem
     - assets/pem/private.pem
+    - assets/animate/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -10,9 +10,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  var t = await GlobalConfig().initGlobalConfig();
-  print('初始化状态$t');
   runApp(MyApp());
 }
 
@@ -29,9 +26,7 @@ class MyApp extends StatelessWidget {
         child: MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ChatChattersPageVm()),
-        ChangeNotifierProvider(
-          create: (context) => PersonPageVm(),
-        )
+        ChangeNotifierProvider(create: (context) => PersonPageVm(),)
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -42,7 +37,7 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.dark,
         title: 'Campus',
         onGenerateRoute: AppRoute.generateRoute,
-        initialRoute: RouteName.index,
+        initialRoute: RouteName.splashPage,
       ),
     ));
   }

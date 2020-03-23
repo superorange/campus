@@ -63,7 +63,6 @@ class TradeVm extends BaseVm with ChangeNotifier {
       if (val.data['code'] == 200) {
         var model = GoodsListModel.fromJson(val.data);
         if (model.goodsModel.isEmpty) {
-          showToast('没有更多啦！');
           pageIndex--;
           return LoadState.NullData;
         }

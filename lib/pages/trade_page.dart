@@ -20,7 +20,7 @@ class TradePage extends StatefulWidget {
 }
 
 class _TradePageState extends State<TradePage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   TextEditingController _textEditingController = TextEditingController();
   EasyRefreshController _controller = EasyRefreshController();
   TradeVm tradeVm = TradeVm();
@@ -30,7 +30,21 @@ class _TradePageState extends State<TradePage>
   @override
   void dispose() {
     _textEditingController.dispose();
+    WidgetsBinding.instance.removeObserver(this); // 移除监听器
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this); // 注册监听器
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('状态改变：${state}');
+
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -39,6 +53,8 @@ class _TradePageState extends State<TradePage>
     return ChangeNotifierProvider.value(
       value: tradeVm,
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (Api.token.isEmpty) {
@@ -50,7 +66,6 @@ class _TradePageState extends State<TradePage>
           child: Icon(Icons.add),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        backgroundColor: Colors.grey[300],
         body: SafeArea(child: Consumer<TradeVm>(
           builder: (context, vm, _) {
             if (vm.goodsListModel == null && first) {
@@ -102,6 +117,7 @@ class _TradePageState extends State<TradePage>
                 footer: ClassicalFooter(noMoreText: '没有更多啦！'),
                 builder: (context, physics, header, footer) {
                   return CustomScrollView(
+
                     physics: physics,
                     slivers: <Widget>[
                       header,
@@ -293,6 +309,7 @@ class _TradePageState extends State<TradePage>
                           : SliverPadding(
                               padding: EdgeInsets.only(left: 10, right: 10),
                               sliver: SliverStaggeredGrid.countBuilder(
+
                                 crossAxisCount: 4,
                                 itemBuilder: (context, index) => Container(
                                     decoration: BoxDecoration(
@@ -469,7 +486,7 @@ class _TradePageState extends State<TradePage>
   }
 
   @override
-  // TODO: implement wantKeepAlive
+
   bool get wantKeepAlive => true;
 }
 

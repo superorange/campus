@@ -3,6 +3,7 @@ import 'package:flutter_app/pages/ce_shi.dart';
 import 'package:flutter_app/pages/chat_page.dart';
 import 'package:flutter_app/pages/index_page.dart';
 import 'package:flutter_app/pages/login_page.dart';
+import 'package:flutter_app/pages/splash_page.dart';
 import 'package:flutter_app/pages/trade_one_page.dart';
 import 'package:flutter_app/pages/trade_page.dart';
 import 'package:flutter_app/pages/trade_search_page.dart';
@@ -11,7 +12,7 @@ import 'package:flutter_app/pages/upload_page_ok.dart';
 import 'package:flutter_app/routes/page_route.dart';
 
 class RouteName {
-  static const index = '/';
+  static const index = '/index';
 
   static const login = '/login';
   static const smsLogin = '/smsLogin';
@@ -19,6 +20,7 @@ class RouteName {
   static const tradeSearchPage = '/tradeSearchPage';
   static const tradeListPage = '/TradeListPage';
   static const tradeInformationPage = '/tradeInformationPage';
+  static const splashPage = '/';
 
   static const uploadPage = '/uploadPage';
   static const uploadPageOk = '/uploadPageOk';
@@ -35,6 +37,8 @@ class RouteName {
 class AppRoute {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case RouteName.splashPage:
+        return DefaultRoute(child: SplashPage());
       case RouteName.index:
         return PageRouteBuilder(
             pageBuilder: (context, animation, _) => IndexPage());

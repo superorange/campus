@@ -16,99 +16,40 @@ import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:jverify/jverify.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
-
-class LoginPage extends StatefulWidget {
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  AnimationController _animationController;
-  //logo动画
-  Animation<double> _animation1;
-  CurvedAnimation _curvedAnimation1;
+class LoginPage extends StatelessWidget {
   Jverify jverify = Jverify();
-
-  @override
-  initState() {
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 3));
-    _curvedAnimation1 = CurvedAnimation(
-        parent: _animationController, curve: Curves.fastOutSlowIn);
-    _animation1 =
-        Tween<double>(begin: -350, end: 0.0).animate(_curvedAnimation1);
-    _animationController.forward();
-    super.initState();
-  }
-
-  @override
-  dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
   Shader shader;
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: true,
         elevation: .0,
       ),
-      body: SafeArea(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          SizedBox(
-            height: setHeight(50),
-          ),
-          AnimatedBuilder(
-            animation: _animation1,
-            builder: (context, _) => Transform.translate(
-              offset: Offset(0, _animation1.value),
-              child: Container(
-                height: 140,
-                width: 140,
-//                child: CircleAvatar(
-//                  foregroundColor: Colors.blueAccent,
-//                  backgroundImage: AssetImage('assets/images/logo.png'),
-//                ),
-                child: Text(
-                  '校园二手交易',
-                  style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(left: 40, right: 40),
-                alignment: Alignment.center,
-                child: ChooseLoginPanel(),
-              ),
-              SizedBox(
-                height: 50,
-              ),
-            ],
-          )),
-        ],
-      )),
+      body: Container(
+        alignment: Alignment.center,
+        margin: EdgeInsets.only(
+          left: 25,right: 25
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(child: Align(child: Text('闲货直通车',style: TextStyle(
+                color: Colors.brown,
+                fontSize: 35,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 3
+            ),),alignment: Alignment(0,-0.5),),flex: 1,fit: FlexFit.tight,),
+            Flexible(child:  ChooseLoginPanel(),flex: 1,fit: FlexFit.tight,),
+          ],
+        )
+      )
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
+
+
 
 class ChooseLoginPanel extends StatelessWidget {
   @override

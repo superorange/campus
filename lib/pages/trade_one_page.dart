@@ -67,7 +67,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                               context: context,
                               builder: (context) {
                                 return Container(
-                                  height: setHeight(300),
+                                  height: setHeight(200),
                                   child: CupertinoActionSheetAction(
                                       onPressed: () {
                                         Navigator.pop(context);
@@ -78,7 +78,10 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                             width: double.infinity,
                                             height: setHeight(60),
                                             alignment: Alignment.center,
-                                            child: Text('举报'),
+                                            child: Text('举报',style: TextStyle(
+                                              fontSize: 20,
+                                              letterSpacing: 5
+                                            ),),
                                           ),
                                           onPressed: () {
                                             showDialog(

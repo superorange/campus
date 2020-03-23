@@ -15,7 +15,6 @@ class Api {
   static const goodsCollection = '/api/goods/collect';
   static const goodsReport = '/api/goods/report';
   static const qiNiu = 'http://upload-z2.qiniup.com';
-
   static String token = '';
   static String userId = '';
 //  static init() {

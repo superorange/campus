@@ -63,9 +63,7 @@ class _IndexPageState extends State<IndexPage> {
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.instance =
-        ScreenUtil(width: 750, height: 1334, allowFontScaling: true)
-          ..init(context);
+
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       body: PageView(
