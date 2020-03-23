@@ -124,7 +124,6 @@ class _ChatPageState extends State<ChatPage> {
       color: Colors.white,
       child: SafeArea(
           child: Scaffold(
-        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text('${chatDataModel.userName}'),
           centerTitle: true,

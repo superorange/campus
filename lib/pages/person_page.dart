@@ -35,15 +35,19 @@ class _PersonPageState extends State<PersonPage>
         child: Scaffold(
           body: Consumer<PersonPageVm>(builder: (context, vm, _) {
             if (vm.user == null) {
-              return Material(
-                child: Center(
-                  child: FlatButton(
-                      color: Colors.blue,
-                      onPressed: () {
-                        Navigator.pushNamed(context, RouteName.login);
-                      },
-                      child: Text('登录')),
-                ),
+
+              return InkWell(
+              onTap: () {
+              Navigator.pushNamed(context, RouteName.login);
+              },
+              child:Center(
+                  child:  Text('登录',style: TextStyle(
+                    color: Colors.brown,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 8
+                  ),)
+              ),
               );
             }
             return EasyRefresh(

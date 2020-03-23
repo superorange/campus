@@ -106,7 +106,6 @@ class _UploadPageState extends State<UploadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('发布商品'),
         automaticallyImplyLeading: true,
@@ -1354,7 +1353,7 @@ class _UploadPageState extends State<UploadPage> {
                   style: TextStyle(
                       letterSpacing: 10,
                       fontSize: 17,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),
                 alignment: Alignment.center,

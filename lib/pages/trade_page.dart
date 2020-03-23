@@ -31,8 +31,12 @@ class _TradePageState extends State<TradePage>
   void dispose() {
     _textEditingController.dispose();
     WidgetsBinding.instance.removeObserver(this); // 移除监听器
+   checkFocus();
     super.dispose();
   }
+
+
+
 
   @override
   void initState() {
@@ -46,6 +50,11 @@ class _TradePageState extends State<TradePage>
 
     super.didChangeAppLifecycleState(state);
   }
+  void checkFocus(){
+    if(_focusNode.hasFocus){
+      _focusNode.unfocus();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,6 @@ class _TradePageState extends State<TradePage>
     return ChangeNotifierProvider.value(
       value: tradeVm,
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
         resizeToAvoidBottomInset: false,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -133,7 +141,7 @@ class _TradePageState extends State<TradePage>
                                 style: TextStyle(
                                     fontSize: 27,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black),
+                                    color: Colors.green),
                               );
                             }),
                             SizedBox(
@@ -147,7 +155,6 @@ class _TradePageState extends State<TradePage>
                                 maxLines: 1,
                                 overflow: TextOverflow.clip,
                                 style: TextStyle(
-                                    color: Colors.black54,
                                     fontSize: 25,
                                     fontWeight: FontWeight.w500),
                               ),
@@ -160,7 +167,6 @@ class _TradePageState extends State<TradePage>
                                 maxLines: 1,
                                 overflow: TextOverflow.clip,
                                 style: TextStyle(
-                                    color: Colors.black54,
                                     fontSize: 25,
                                     fontWeight: FontWeight.w500),
                               ),
@@ -190,6 +196,7 @@ class _TradePageState extends State<TradePage>
                                 width: setWidth(150),
                                 child: InkWell(
                                   onTap: () {
+                                    checkFocus();
                                     Navigator.pushNamed(
                                         context, RouteName.tradeListPage,
                                         arguments: {'category': '考研资料'});
@@ -211,6 +218,7 @@ class _TradePageState extends State<TradePage>
                                 width: setWidth(150),
                                 child: InkWell(
                                   onTap: () {
+                                    checkFocus();
                                     Navigator.pushNamed(
                                         context, RouteName.tradeListPage,
                                         arguments: {'category': '数码产品'});
@@ -232,6 +240,7 @@ class _TradePageState extends State<TradePage>
                                 width: setWidth(150),
                                 child: InkWell(
                                   onTap: () {
+                                    checkFocus();
                                     Navigator.pushNamed(
                                         context, RouteName.tradeListPage,
                                         arguments: {'category': '二手书籍'});
@@ -253,6 +262,7 @@ class _TradePageState extends State<TradePage>
                                 width: setWidth(150),
                                 child: InkWell(
                                   onTap: () {
+                                    checkFocus();
                                     Navigator.pushNamed(
                                         context, RouteName.tradeListPage,
                                         arguments: {'category': '其它'});
@@ -318,13 +328,11 @@ class _TradePageState extends State<TradePage>
                                     ),
                                     child: InkWell(
                                       onTap: () {
-                                        if (Provider.of<PersonPageVm>(context,
-                                                    listen: false)
-                                                .user ==
-                                            null) {
+                                        if (Api.token.isEmpty) {
                                           showToast('登录后即可查看更多哟');
                                           return;
                                         }
+                                        checkFocus();
                                         Navigator.pushNamed(context,
                                             RouteName.tradeInformationPage,
                                             arguments:
@@ -511,6 +519,11 @@ class MyHeader extends SliverPersistentHeaderDelegate {
             flex: 4,
             child: TextField(
                 focusNode: focusNode,
+                onSubmitted: (_){
+                  if (focusNode.hasFocus) {
+                    focusNode.unfocus();
+                  }
+                },
                 controller: textEditingController,
                 decoration: InputDecoration(
                     hintText: '搜点什么？', border: InputBorder.none),

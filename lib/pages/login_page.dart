@@ -27,24 +27,21 @@ class LoginPage extends StatelessWidget {
         automaticallyImplyLeading: true,
         elevation: .0,
       ),
-      body: Container(
-        alignment: Alignment.center,
-        margin: EdgeInsets.only(
-          left: 25,right: 25
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Flexible(child: Align(child: Text('闲货直通车',style: TextStyle(
-                color: Colors.brown,
-                fontSize: 35,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 3
-            ),),alignment: Alignment(0,-0.5),),flex: 1,fit: FlexFit.tight,),
-            Flexible(child:  ChooseLoginPanel(),flex: 1,fit: FlexFit.tight,),
-          ],
-        )
-      )
+      body: Padding(padding: EdgeInsets.only(
+        left: 25,right: 25
+      ),child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Flexible(child: Align(child: Text('闲货直通车',style: TextStyle(
+              color: Colors.brown,
+              fontSize: 35,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 3
+          ),),alignment: Alignment(0,-0.5),),flex: 1,fit: FlexFit.tight,),
+          Flexible(child:  ChooseLoginPanel(),flex: 2,fit: FlexFit.tight,),
+        ],
+      ),),
     );
   }
 }
@@ -127,7 +124,6 @@ class ChooseLoginPanel extends StatelessWidget {
             child: Container(
               width: double.infinity,
               height: 50,
-              padding: EdgeInsets.only(left: 10, right: 10),
               alignment: Alignment.center,
               child: Text(
                 '本机号码一键登录',
@@ -150,7 +146,6 @@ class ChooseLoginPanel extends StatelessWidget {
             child: Container(
               width: double.infinity,
               height: 50,
-              padding: EdgeInsets.only(left: 10, right: 10),
               alignment: Alignment.center,
               child: Text(
                 '短信验证码登录',
@@ -173,7 +168,6 @@ class ChooseLoginPanel extends StatelessWidget {
             child: Container(
               width: double.infinity,
               height: 50,
-              padding: EdgeInsets.only(left: 10, right: 10),
               alignment: Alignment.center,
               child: Text(
                 '密码登录',
@@ -505,7 +499,6 @@ class PwdLogin extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: pwdLoginVm,
       child: Scaffold(
-        backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: true,
           elevation: .0,

@@ -27,11 +27,8 @@ class _ChattersPageState extends State<ChattersPage>
   @override
   // ignore: must_call_super
   Widget build(BuildContext context) {
-    print('build');
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.grey[100],
         title: Text('聊天'),
         elevation: .0,
         centerTitle: true,

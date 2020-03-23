@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/database/database_manager.dart';
 import 'package:flutter_app/database/user_dababase.dart';
 import 'package:flutter_app/model/base_model.dart';
@@ -91,6 +92,7 @@ class PersonPageVm extends BaseVm with ChangeNotifier {
     await DataBaseManager().clearChatMsgTable();
     await DataBaseManager().clearChatterTable();
     Hive.box('user_data')..delete('user')..delete('token');
+    Api.token='';Api.userId='';
     Provider.of<ChatChattersPageVm>(context, listen: false).clearUser();
     _user = null;
     notifyListeners();

@@ -43,7 +43,6 @@ class _TradeListPageState extends State<TradeListPage> {
     return ChangeNotifierProvider.value(
       value: tradeVm,
       child: Scaffold(
-        backgroundColor: Colors.grey[300],
         body: SafeArea(
           child: Stack(
             children: <Widget>[

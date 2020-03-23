@@ -1,13 +1,14 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/pages/person_page.dart';
 import 'package:flutter_app/pages/trade_page.dart';
 import 'package:flutter_app/pages/vm/chat_chatters_vm.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
+import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/base_utils.dart';
 import 'package:flutter_app/utils/global_config.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
@@ -74,6 +75,10 @@ class _IndexPageState extends State<IndexPage> {
       bottomNavigationBar: Consumer<PersonPageVm>(builder: (context, vm, _) {
         return BottomNavigationBar(
             onTap: (index) {
+              if((index==1||index==2)&&Api.token.isEmpty){
+                Navigator.pushNamed(context, RouteName.login);
+                return;
+              }
               _pageController.jumpToPage(index);
               _currentIndex = index;
               setState(() {});

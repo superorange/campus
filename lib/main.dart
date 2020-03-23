@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/pages/vm/chat_chatters_vm.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
-import 'package:flutter_app/utils/global_config.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
