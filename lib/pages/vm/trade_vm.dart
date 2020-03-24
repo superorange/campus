@@ -4,7 +4,6 @@ import 'package:flutter_app/model/goods_list_model.dart';
 import 'package:flutter_app/pages/vm/base_vm.dart';
 import 'package:flutter_app/service/goods_service.dart';
 import 'package:flutter_app/utils/base_utils.dart';
-import 'package:oktoast/oktoast.dart';
 
 class TradeVm extends BaseVm with ChangeNotifier {
   GoodsListModel goodsListModel;

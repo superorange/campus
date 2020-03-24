@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/api/api.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/pages/vm/trade_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/base_utils.dart';
 import 'package:flutter_app/utils/screen_config.dart';
+import 'package:flutter_app/widget/circle_head_pic.dart';
 import 'package:flutter_app/widget/image_error.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
@@ -46,7 +48,6 @@ class _TradePageState extends State<TradePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('状态改变：${state}');
 
     super.didChangeAppLifecycleState(state);
   }
@@ -66,7 +67,7 @@ class _TradePageState extends State<TradePage>
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (Api.token.isEmpty) {
-              showToast('登录即可上传哦！');
+              showToast(AppText.loginHint);
               return;
             }
             Navigator.pushNamed(context, RouteName.uploadPage);
@@ -122,7 +123,7 @@ class _TradePageState extends State<TradePage>
                   });
                 },
                 header: ClassicalHeader(),
-                footer: ClassicalFooter(noMoreText: '没有更多啦！'),
+                footer: ClassicalFooter(noMoreText: AppText.noMoreText),
                 builder: (context, physics, header, footer) {
                   return CustomScrollView(
 
@@ -137,7 +138,7 @@ class _TradePageState extends State<TradePage>
                             ),
                             Consumer<PersonPageVm>(builder: (context, vm, _) {
                               return Text(
-                                '嗨！${vm.user?.userName ?? '游客'}',
+                                '${AppText.hi} ${vm.user?.userName ?? AppText.tourists}',
                                 style: TextStyle(
                                     fontSize: 27,
                                     fontWeight: FontWeight.bold,
@@ -151,7 +152,7 @@ class _TradePageState extends State<TradePage>
                               width: double.infinity,
                               alignment: Alignment.center,
                               child: Text(
-                                'What would you like to see?',
+                                AppText.welcomeText1,
                                 maxLines: 1,
                                 overflow: TextOverflow.clip,
                                 style: TextStyle(
@@ -163,7 +164,7 @@ class _TradePageState extends State<TradePage>
                               width: double.infinity,
                               alignment: Alignment.center,
                               child: Text(
-                                'Search below now!',
+                                AppText.welcomeText2,
                                 maxLines: 1,
                                 overflow: TextOverflow.clip,
                                 style: TextStyle(
@@ -208,7 +209,7 @@ class _TradePageState extends State<TradePage>
                                         'assets/images/kaoyan.png',
                                         height: setHeight(70),
                                       ),
-                                      Text('考研资料'),
+                                      Text(AppText.kaoYan),
                                     ],
                                   ),
                                 ),
@@ -230,7 +231,7 @@ class _TradePageState extends State<TradePage>
                                         'assets/images/shuma.png',
                                         height: setHeight(70),
                                       ),
-                                      Text('数码产品')
+                                      Text(AppText.shuMa)
                                     ],
                                   ),
                                 ),
@@ -252,7 +253,7 @@ class _TradePageState extends State<TradePage>
                                         'assets/images/book.png',
                                         height: setHeight(70),
                                       ),
-                                      Text('二手书籍')
+                                      Text(AppText.shuJi)
                                     ],
                                   ),
                                 ),
@@ -274,7 +275,7 @@ class _TradePageState extends State<TradePage>
                                         'assets/images/qita.png',
                                         height: setHeight(70),
                                       ),
-                                      Text('其它类别')
+                                      Text(AppText.qiTaCategory)
                                     ],
                                   ),
                                 ),
@@ -305,7 +306,7 @@ class _TradePageState extends State<TradePage>
                                             height: 10,
                                           ),
                                           Text(
-                                            '网络似乎有点不好，下拉刷新试试呢',
+                                            AppText.netError,
                                             style: TextStyle(color: Colors.red),
                                           )
                                         ],
@@ -329,7 +330,7 @@ class _TradePageState extends State<TradePage>
                                     child: InkWell(
                                       onTap: () {
                                         if (Api.token.isEmpty) {
-                                          showToast('登录后即可查看更多哟');
+                                          showToast(AppText.loginMore);
                                           return;
                                         }
                                         checkFocus();
@@ -400,28 +401,7 @@ class _TradePageState extends State<TradePage>
                                             child: Row(
                                               children: <Widget>[
                                                 Flexible(
-                                                  child: Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 2),
-                                                    child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              36),
-                                                      child: CachedNetworkImage(
-                                                        fit: BoxFit.cover,
-                                                        imageUrl:
-                                                            '${vm.goodsListModel.goodsModel[index].headPic}',
-                                                        errorWidget: (context,
-                                                                s, _) =>
-                                                            ImageErrorWidget(),
-                                                        fadeInCurve:
-                                                            Curves.easeIn,
-                                                        placeholder: (context,
-                                                                s) =>
-                                                            CupertinoActivityIndicator(),
-                                                      ),
-                                                    ),
-                                                  ),
+                                                  child: CircleHeadPic(vm.goodsListModel.goodsModel[index].headPic),
                                                   flex: 1,
                                                 ),
                                                 Flexible(
@@ -557,11 +537,9 @@ class MyHeader extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  // TODO: implement maxExtent
   double get maxExtent => 55;
 
   @override
-  // TODO: implement minExtent
   double get minExtent => 55;
 
   @override

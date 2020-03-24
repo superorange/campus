@@ -50,7 +50,6 @@ class PersonPageVm extends BaseVm with ChangeNotifier {
   void updateUser(Map data) {
     UserService().updateUser(data: data).then((val) {
       if (val.data['code'] == 200) {
-        showToast('操作成功');
         _user = UserModel.fromJson(val.data['data']);
         notifyListeners();
       } else {

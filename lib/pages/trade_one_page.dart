@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/pages/vm/trade_one_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/screen_config.dart';
-import 'package:flutter_app/widget/image_error.dart';
+import 'package:flutter_app/widget/circle_head_pic.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +55,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                         icon: Icon(Icons.more_horiz),
                         onPressed: () {
                           if (vm.oneGoodsModel == null) {
-                            showToast('请等待加载完成',
+                            showToast(AppText.waitLoading,
                                 position: ToastPosition.bottom);
                             return;
                           }
@@ -78,7 +79,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                             width: double.infinity,
                                             height: setHeight(60),
                                             alignment: Alignment.center,
-                                            child: Text('举报',style: TextStyle(
+                                            child: Text(AppText.report,style: TextStyle(
                                               fontSize: 20,
                                               letterSpacing: 5
                                             ),),
@@ -88,13 +89,13 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                 context: context,
                                                 builder: (ctx) {
                                                   return CupertinoAlertDialog(
-                                                    title: Text('确认举报吗？'),
+                                                    title: Text(AppText.reportSure),
                                                     content: Column(
                                                       children: <Widget>[
                                                         SizedBox(
                                                           height: 5,
                                                         ),
-                                                        Text('温馨提示： 恶意举报将封禁账号'),
+                                                        Text(AppText.reportHint),
                                                         Material(
                                                           color: Colors
                                                               .transparent,
@@ -113,8 +114,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                               maxLines: null,
                                                               decoration:
                                                                   InputDecoration(
-                                                                      hintText:
-                                                                          '举报原因(10字以上)'),
+                                                                      hintText:AppText.reportReason),
                                                             ),
                                                           ),
                                                         )
@@ -122,19 +122,19 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                     ),
                                                     actions: <Widget>[
                                                       CupertinoButton(
-                                                          child: Text('取消举报'),
+                                                          child: Text(AppText.cancle),
                                                           onPressed: () =>
                                                               Navigator.pop(
                                                                   ctx)),
                                                       CupertinoButton(
-                                                          child: Text('确认举报'),
+                                                          child: Text(AppText.sure),
                                                           onPressed: () {
                                                             if (_textEditingController
                                                                     .text
                                                                     .length <=
                                                                 9) {
                                                               showToast(
-                                                                  '举报理由不小于10字');
+                                                                  AppText.tooSmallReportReason);
                                                               return;
                                                             }
                                                             vm.goodsReport(
@@ -187,18 +187,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                         shape: BoxShape.circle,
                                         color: Colors.grey[300],
                                       ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(36),
-                                        child: CachedNetworkImage(
-                                          width: 40,
-                                          height: 40,
-                                          imageUrl: vm.oneGoodsModel.headPic,
-                                          placeholder: (context, _) =>
-                                              CupertinoActivityIndicator(),
-                                          errorWidget: (context, s, _) =>
-                                              ImageErrorWidget(),
-                                        ),
-                                      ),
+                                      child: CircleHeadPic(vm.oneGoodsModel.headPic),
                                     ),
                                     SizedBox(
                                       width: 20,
@@ -245,14 +234,14 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                 Duration(milliseconds: 500),
                                             child: vm.oneGoodsModel.uCollection
                                                 ? Text(
-                                                    '已关注',
+                                                    AppText.note2,
                                                     key: ValueKey('true'),
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                     ),
                                                   )
                                                 : Text(
-                                                    '关注',
+                                                  AppText.note1,
                                                     key: ValueKey('false'),
                                                     style: TextStyle(
                                                       color: Colors.white,
@@ -267,7 +256,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                 child: RichText(
                                   text: TextSpan(children: [
                                     TextSpan(
-                                        text: '物品名:    ',
+                                        text: AppText.goodsName,
                                         style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -288,7 +277,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                 child: RichText(
                                   text: TextSpan(children: [
                                     TextSpan(
-                                        text: '详情：  ',
+                                        text: AppText.goodsDec,
                                         style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -309,7 +298,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                 child: RichText(
                                   text: TextSpan(children: [
                                     TextSpan(
-                                        text: '商品位置： ',
+                                        text: AppText.goodsLocation,
                                         style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -358,7 +347,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                     color: Colors.white,
                                     onPressed: () {},
                                     icon: Icon(Icons.message),
-                                    label: Text('留言')),
+                                    label: Text(AppText.ly)),
                                 flex: 1,
                                 fit: FlexFit.tight,
                               ),
@@ -379,12 +368,12 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                     label: AnimatedSwitcher(
                                       duration: Duration(milliseconds: 500),
                                       child: vm.oneGoodsModel.gCollection
-                                          ? Text(
-                                              '已收藏',
+                                          ? Text(AppText.collection2,
+
                                               key: ValueKey('true'),
                                             )
                                           : Text(
-                                              '收藏',
+                                        AppText.collection1,
                                               key: ValueKey('false'),
                                             ),
                                     )),
@@ -416,7 +405,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                     vm.oneGoodsModel.userName
                                               });
                                         },
-                                        label: Text('聊天'),
+                                        label: Text(AppText.chat),
                                       ),
                                       flex: 1,
                                     ),

@@ -2,11 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_app/pages/vm/person_page_vm.dart';
+import 'package:flutter_app/config/api/api.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/pages/vm/trade_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/base_utils.dart';
 import 'package:flutter_app/utils/screen_config.dart';
+import 'package:flutter_app/widget/circle_head_pic.dart';
+import 'package:flutter_app/widget/image_error.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -14,14 +17,14 @@ import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
-class TradeListPage extends StatefulWidget {
-  TradeListPage(this.searchValue);
+class TradeSearchPage extends StatefulWidget {
+  TradeSearchPage(this.searchValue);
   final Map searchValue;
   @override
-  _TradeListPageState createState() => _TradeListPageState();
+  _TradeSearchPageState createState() => _TradeSearchPageState();
 }
 
-class _TradeListPageState extends State<TradeListPage> {
+class _TradeSearchPageState extends State<TradeSearchPage> {
   TextEditingController _textEditingController = TextEditingController();
   FocusNode _focusNode = FocusNode();
   TradeVm tradeVm = TradeVm();
@@ -90,14 +93,14 @@ class _TradeListPageState extends State<TradeListPage> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text('网络有问题，检测一下网络吧')
+                            Text(AppText.netError1)
                           ],
                         ),
                       ),
                     );
                   } else if (vm.goodsListModel.goodsModel.isEmpty) {
                     return Center(
-                      child: Text('哎呀，没有找到呢！别灰心，换个词试试呢'),
+                      child: Text(AppText.notFound),
                     );
                   }
 
@@ -107,7 +110,7 @@ class _TradeListPageState extends State<TradeListPage> {
                     child: EasyRefresh(
                         controller: _controller,
                         header: ClassicalHeader(),
-                        footer: ClassicalFooter(noMoreText: '没有更多啦'),
+                        footer: ClassicalFooter(noMoreText: AppText.noMoreText),
                         onLoad: () async {
                           await vm.loadMore().then((val) {
                             if (val == LoadState.LoadSuccess) {
@@ -157,11 +160,8 @@ class _TradeListPageState extends State<TradeListPage> {
                               Container(
                                   child: InkWell(
                             onTap: () {
-                              if (Provider.of<PersonPageVm>(context,
-                                          listen: false)
-                                      .user ==
-                                  null) {
-                                showToast('登录后即可查看更多哟');
+                              if (Api.token.isEmpty) {
+                                showToast(AppText.loginMore);
                                 return;
                               }
                               Navigator.pushNamed(
@@ -179,22 +179,20 @@ class _TradeListPageState extends State<TradeListPage> {
                                 children: <Widget>[
                                   Expanded(
                                       child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(7),
-                                        topLeft: Radius.circular(7)),
-                                    child: CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      imageUrl:
+                                        borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(7),
+                                            topLeft: Radius.circular(7)),
+                                        child: CachedNetworkImage(
+                                          fit: BoxFit.fill,
+                                          imageUrl:
                                           '${vm.goodsListModel.goodsModel[index].gImages.first}',
-                                      errorWidget: (context, s, o) => Center(
-                                        child: Text('s:$s,0:$o'),
-                                      ),
-                                      fadeInCurve: Curves.easeIn,
-                                      placeholder: (context, s) => Center(
-                                        child: Text('s:$s'),
-                                      ),
-                                    ),
-                                  )),
+                                          errorWidget: (context, s, _) =>
+                                              ImageErrorWidget(),
+                                          fadeInCurve: Curves.easeIn,
+                                          placeholder: (context, s) =>
+                                              CupertinoActivityIndicator(),
+                                        ),
+                                      ),),
                                   Container(
                                       width: double.infinity,
                                       margin:
@@ -231,9 +229,7 @@ class _TradeListPageState extends State<TradeListPage> {
                                     child: Row(
                                       children: <Widget>[
                                         Flexible(
-                                          child: Container(
-                                            child: CircleAvatar(),
-                                          ),
+                                          child: CircleHeadPic(vm.goodsListModel.goodsModel.first.headPic),
                                           flex: 1,
                                         ),
                                         Flexible(
@@ -307,7 +303,7 @@ class _TradeListPageState extends State<TradeListPage> {
                             controller: _textEditingController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: '搜点什么',
+                              hintText: AppText.searchHint,
                             ),
                             onEditingComplete: () {
                               if (_focusNode.hasFocus) {

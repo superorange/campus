@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/config/font/font_style.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/screen_config.dart';
-import 'package:flutter_app/widget/image_error.dart';
 import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:flutter_app/widget/tab_widget.dart';
 import 'package:flutter_easyrefresh/bezier_circle_header.dart';
@@ -41,7 +41,7 @@ class _PersonPageState extends State<PersonPage>
               Navigator.pushNamed(context, RouteName.login);
               },
               child:Center(
-                  child:  Text('登录',style: TextStyle(
+                  child:  Text(AppText.login,style: TextStyle(
                     color: Colors.brown,
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
@@ -62,19 +62,16 @@ class _PersonPageState extends State<PersonPage>
                       width: double.infinity,
                       child: Stack(
                         children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              Container(
-                                height: 290,
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
+                          Container(
+                            height: 340,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                gradient: LinearGradient(
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                   colors: [Colors.blue[300], Colors.blueAccent],
                                 )),
-                              ),
-                              Expanded(child: Container()),
-                            ],
+                            child: CachedNetworkImage(imageUrl: vm.user.headPic,fit: BoxFit.fill,errorWidget: (s,_,t)=>Container(),),
                           ),
                           Container(
                             height: 350,
@@ -85,64 +82,23 @@ class _PersonPageState extends State<PersonPage>
                                 SizedBox(
                                   height: 50,
                                 ),
-                                Text(
-                                  '个人中心',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 22),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(padding: EdgeInsets.only(
+                                    left: 20
+                                  ),child: Text(
+                                    AppText.personCenter,
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22),
+                                  ),),
                                 ),
                                 const SizedBox(
-                                  height: 25,
+                                  height: 70,
                                 ),
                                 InkWell(
-                                  onTap: () async {
-                                    List<Asset> headPic;
-                                    try {
-                                      headPic =
-                                          await MultiImagePicker.pickImages(
-                                              maxImages: 1, enableCamera: true);
-                                    } catch (e) {
-                                      return;
-                                    }
-                                    showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (ctx) {
-                                          vm
-                                              .updateImage(headPic.first)
-                                              .then((val) {
-                                            if (!val) {
-                                              showToast('上传失败，请重试');
-                                            }
-                                            Navigator.pop(context);
-                                          });
-                                          return LoadingWidget(
-                                            ctx,
-                                            canRemove: false,
-                                          );
-                                        });
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(7),
-                                    child: CachedNetworkImage(
-                                      imageUrl: vm.user.headPic,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (c, s, _) =>
-                                          ImageErrorWidget(),
-                                      placeholder: (c, s) => Center(
-                                        child: CupertinoActivityIndicator(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                InkWell(
-                                  onTap: vm.user.userName == '未设置用户名'
+                                  onTap: vm.user.userName.isEmpty
                                       ? () {
                                           showDialog(
                                               context: context,
@@ -162,108 +118,136 @@ class _PersonPageState extends State<PersonPage>
                                         }
                                       : null,
                                   child: Text(
-                                    vm.user.userName == '未设置用户名'
+                                    vm.user.userName.isEmpty
                                         ? '未设置用户名，点击更改'
                                         : '${vm.user.userName}',
                                     style: TextStyle(
-                                        color: Colors.black, fontSize: 17),
+                                        color: Colors.black, fontSize: 20,fontWeight: FontWeight.w500),
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 30,
                                 ),
-                                Card(
-                                  child: vm.user.xh.isEmpty
-                                      ? Center(
-                                          child: FlatButton(
-                                              color: Colors.brown,
-                                              onPressed: () {},
-                                              child: Container(
-                                                margin: EdgeInsets.only(
-                                                    top: 35, bottom: 35),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  '绑定学号',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 20),
-                                                ),
-                                              )),
-                                        )
-                                      : Container(
-                                          height: 100,
-                                          width: double.infinity,
-                                          child: Theme(
-                                              data: ThemeData(
-                                                  textTheme: TextTheme(
-                                                      display2: TextStyle(
-                                                          fontSize: 39))),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: <Widget>[
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: <Widget>[
-                                                      Text.rich(
-                                                        TextSpan(
-                                                            text: '你好 ',
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    '${vm.user.name}',
-                                                              ),
-                                                              TextSpan(
-                                                                  text: '同学'),
-                                                            ]),
-                                                      ),
-                                                      Text.rich(
-                                                        TextSpan(
-                                                            text: '学号 ',
-                                                            children: [
-                                                              TextSpan(
-                                                                  text:
-                                                                      't1670494917'),
-                                                            ]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: <Widget>[
-                                                      Text.rich(
-                                                        TextSpan(
-                                                            text: '四川轻化工大学 ',
-                                                            children: [
-                                                              TextSpan(
-                                                                  text: '宜宾校区'),
-                                                            ]),
-                                                      ),
-                                                      Text.rich(
-                                                        TextSpan(
-                                                            text: '计算机学院 ',
-                                                            children: [
-                                                              TextSpan(
-                                                                  text:
-                                                                      '网络工程2班'),
-                                                            ]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              )),
-                                        ),
-                                  color: Colors.white,
-                                  margin: EdgeInsets.only(
-                                      left: setWidth(25), right: setWidth(25)),
+                                InkWell(
+                                  onTap: vm.user.sign.isEmpty
+                                      ? () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return ModifyInformationWidget(
+                                              '修改个性签名', '请输入新个性签名',
+                                              onCancel: () {
+                                                Navigator.pop(context);
+                                              }, onClick: (val) {
+                                            vm.updateUser({
+                                              'type': 'sign',
+                                              'sign': val
+                                            });
+                                            Navigator.pop(context);
+                                          });
+                                        });
+                                  }
+                                      : null,
+                                  child: Text(
+                                    vm.user.sign .isEmpty
+                                        ? '未设置个性签名，点击更改'
+                                        : '${vm.user.sign}',
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 17,fontWeight: FontWeight.w500),
+                                  ),
                                 ),
+//                                Card(
+//                                  child: vm.user.xh.isEmpty
+//                                      ? Center(
+//                                          child: FlatButton(
+//                                              color: Colors.brown,
+//                                              onPressed: () {},
+//                                              child: Container(
+//                                                margin: EdgeInsets.only(
+//                                                    top: 35, bottom: 35),
+//                                                alignment: Alignment.center,
+//                                                child: Text(
+//                                                  '绑定学号',
+//                                                  style: TextStyle(
+//                                                      color: Colors.white,
+//                                                      fontSize: 20),
+//                                                ),
+//                                              )),
+//                                        )
+//                                      : Container(
+//                                          height: 100,
+//                                          width: double.infinity,
+//                                          child: Theme(
+//                                              data: ThemeData(
+//                                                  textTheme: TextTheme(
+//                                                      display2: TextStyle(
+//                                                          fontSize: 39))),
+//                                              child: Column(
+//                                                crossAxisAlignment:
+//                                                    CrossAxisAlignment.start,
+//                                                mainAxisAlignment:
+//                                                    MainAxisAlignment
+//                                                        .spaceEvenly,
+//                                                children: <Widget>[
+//                                                  Row(
+//                                                    mainAxisAlignment:
+//                                                        MainAxisAlignment
+//                                                            .spaceEvenly,
+//                                                    children: <Widget>[
+//                                                      Text.rich(
+//                                                        TextSpan(
+//                                                            text: '你好 ',
+//                                                            children: [
+//                                                              TextSpan(
+//                                                                text:
+//                                                                    '${vm.user.name}',
+//                                                              ),
+//                                                              TextSpan(
+//                                                                  text: '同学'),
+//                                                            ]),
+//                                                      ),
+//                                                      Text.rich(
+//                                                        TextSpan(
+//                                                            text: '学号 ',
+//                                                            children: [
+//                                                              TextSpan(
+//                                                                  text:
+//                                                                      't1670494917'),
+//                                                            ]),
+//                                                      ),
+//                                                    ],
+//                                                  ),
+//                                                  Row(
+//                                                    mainAxisAlignment:
+//                                                        MainAxisAlignment
+//                                                            .spaceEvenly,
+//                                                    children: <Widget>[
+//                                                      Text.rich(
+//                                                        TextSpan(
+//                                                            text: '四川轻化工大学 ',
+//                                                            children: [
+//                                                              TextSpan(
+//                                                                  text: '宜宾校区'),
+//                                                            ]),
+//                                                      ),
+//                                                      Text.rich(
+//                                                        TextSpan(
+//                                                            text: '计算机学院 ',
+//                                                            children: [
+//                                                              TextSpan(
+//                                                                  text:
+//                                                                      '网络工程2班'),
+//                                                            ]),
+//                                                      ),
+//                                                    ],
+//                                                  ),
+//                                                ],
+//                                              )),
+//                                        ),
+//                                  color: Colors.white,
+//                                  margin: EdgeInsets.only(
+//                                      left: setWidth(25), right: setWidth(25)),
+//                                ),
                               ],
                             ),
                           ),
@@ -385,6 +369,47 @@ class _PersonPageState extends State<PersonPage>
                                   style: AppStyle.personPageInformationStyle()),
                               b: Container(),
                               c: Icon(Icons.phone))),
+                    ),
+                    Divider(),
+                    InkWell(
+                      onTap: () async {
+
+                        List<Asset> headPic;
+                        try {
+                          headPic =
+                          await MultiImagePicker.pickImages(
+                              maxImages: 1, enableCamera: true);
+                        } catch (e) {
+                          return;
+                        }
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (ctx) {
+                              vm
+                                  .updateImage(headPic.first)
+                                  .then((val) {
+                                if (!val) {
+                                  showToast('上传失败，请重试');
+                                }
+                                Navigator.pop(context);
+                              });
+                              return LoadingWidget(
+                                ctx,
+                                canRemove: false,
+                              );
+                            });
+                      },
+                      child: Container(
+                          height: setHeight(60),
+                          padding: EdgeInsets.only(
+                              left: setWidth(25), right: setWidth(25)),
+                          width: double.infinity,
+                          child: InformationWidget(
+                              a: Text('头像/背景图更换',
+                                  style: AppStyle.personPageInformationStyle()),
+                              b: Container(),
+                              c: Icon(Icons.picture_in_picture))),
                     ),
                     Divider(),
                     InkWell(

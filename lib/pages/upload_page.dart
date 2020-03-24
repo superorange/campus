@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/api/api.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/model/base_model.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/service/goods_service.dart';
@@ -65,12 +66,12 @@ class _UploadPageState extends State<UploadPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              '+ 选取图片',
+              AppText.choosePicture,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
             ),
             Text(
-              '长按图片切换主图',
+              AppText.changeMainPic,
               style: TextStyle(color: Colors.black, fontSize: 10),
             ),
           ],
@@ -107,7 +108,7 @@ class _UploadPageState extends State<UploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('发布商品'),
+        title: Text(AppText.faBu),
         automaticallyImplyLeading: true,
         elevation: .0,
       ),
@@ -120,13 +121,13 @@ class _UploadPageState extends State<UploadPage> {
               controller: _gName,
               focusNode: _gNameFocus,
               maxLines: 1,
-              decoration: InputDecoration(hintText: '输入商品名 (至少2字)'),
+              decoration: InputDecoration(hintText: AppText.goodsHint1),
             ),
             TextField(
               controller: _gDec,
               focusNode: _gDecFocus,
               maxLines: 6,
-              decoration: InputDecoration(hintText: '输入详情 (至少10字)'),
+              decoration: InputDecoration(hintText: AppText.goodsHint2),
             ),
             SizedBox(
               height: setHeight(10),
@@ -192,7 +193,7 @@ class _UploadPageState extends State<UploadPage> {
                                   color: Colors.grey[300].withOpacity(0.7),
                                   borderRadius: BorderRadius.circular(3)),
                               child: Text(
-                                ' 主图 ',
+                                AppText.mainPic,
                                 style: TextStyle(),
                               ),
                             ),
@@ -210,7 +211,7 @@ class _UploadPageState extends State<UploadPage> {
               height: 20,
             ),
             Text(
-              'Choose Location:',
+              AppText.location,
               style: TextStyle(
                   color: (c2 || c3 || c4 || c1)
                       ? Colors.blueAccent
@@ -230,7 +231,7 @@ class _UploadPageState extends State<UploadPage> {
                         c2 = c3 = c4 = false;
                         c1 = !c1;
                         if (c1) {
-                          schoolLocation = '宜宾校区';
+                          schoolLocation = AppText.yiBin;
                         }
 
                         setState(() {});
@@ -244,7 +245,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '宜宾校区',
+                          AppText.yiBin,
                           style: TextStyle(
                               color: c1 ? Colors.white : Colors.grey[300]),
                         ),
@@ -258,7 +259,7 @@ class _UploadPageState extends State<UploadPage> {
                         c1 = c3 = c4 = false;
                         c2 = !c2;
                         if (c2) {
-                          schoolLocation = '汇南校区';
+                          schoolLocation = AppText.huiNan;
                         }
                         setState(() {});
                       },
@@ -271,7 +272,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '汇南校区',
+                          AppText.huiNan,
                           style: TextStyle(
                               color: c2 ? Colors.white : Colors.grey[300]),
                         ),
@@ -285,7 +286,7 @@ class _UploadPageState extends State<UploadPage> {
                         c2 = c1 = c4 = false;
                         c3 = !c3;
                         if (c3) {
-                          schoolLocation = '营盘校区';
+                          schoolLocation = AppText.yinPan;
                         }
                         setState(() {});
                       },
@@ -298,7 +299,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '营盘校区',
+                          AppText.yinPan,
                           style: TextStyle(
                               color: c3 ? Colors.white : Colors.grey[300]),
                         ),
@@ -312,7 +313,7 @@ class _UploadPageState extends State<UploadPage> {
                         c2 = c3 = c1 = false;
                         c4 = !c4;
                         if (c4) {
-                          schoolLocation = '其它';
+                          schoolLocation = AppText.qiTaLocation;
                         }
                         setState(() {});
                       },
@@ -325,7 +326,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '其它',
+                          AppText.qiTaLocation,
                           style: TextStyle(
                               color: c4 ? Colors.white : Colors.grey[300]),
                         ),
@@ -337,7 +338,7 @@ class _UploadPageState extends State<UploadPage> {
               ),
             ),
             Text(
-              'Choose Category:',
+              AppText.category,
               style: TextStyle(
                   color: (l2 || l3 || l4 || l1)
                       ? Colors.blueAccent
@@ -357,7 +358,7 @@ class _UploadPageState extends State<UploadPage> {
                         l2 = l3 = l4 = false;
                         l1 = !l1;
                         if (l1) {
-                          category = '数码产品';
+                          category = AppText.shuMa;
                         }
                         setState(() {});
                       },
@@ -370,7 +371,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '数码产品',
+                          AppText.shuMa,
                           style: TextStyle(
                               color: l1 ? Colors.white : Colors.grey[300]),
                         ),
@@ -384,7 +385,7 @@ class _UploadPageState extends State<UploadPage> {
                         l1 = l3 = l4 = false;
                         l2 = !l2;
                         if (l2) {
-                          category = '考研资料';
+                          category = AppText.kaoYan;
                         }
                         setState(() {});
                       },
@@ -397,7 +398,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '考研资料',
+                          AppText.kaoYan,
                           style: TextStyle(
                               color: l2 ? Colors.white : Colors.grey[300]),
                         ),
@@ -411,7 +412,7 @@ class _UploadPageState extends State<UploadPage> {
                         l2 = l1 = l4 = false;
                         l3 = !l3;
                         if (l3) {
-                          category = '二手书籍';
+                          category = AppText.shuJi;
                         }
                         setState(() {});
                       },
@@ -424,7 +425,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '二手书籍',
+                          AppText.shuJi,
                           style: TextStyle(
                               color: l3 ? Colors.white : Colors.grey[300]),
                         ),
@@ -438,7 +439,7 @@ class _UploadPageState extends State<UploadPage> {
                         l2 = l3 = l1 = false;
                         l4 = !l4;
                         if (l4) {
-                          category = '其它';
+                          category = AppText.qiTaCategory;
                         }
                         setState(() {});
                       },
@@ -451,7 +452,7 @@ class _UploadPageState extends State<UploadPage> {
                         width: double.infinity,
                         height: double.infinity,
                         child: Text(
-                          '其它',
+                          AppText.qiTaCategory,
                           style: TextStyle(
                               color: l4 ? Colors.white : Colors.grey[300]),
                         ),
@@ -466,7 +467,7 @@ class _UploadPageState extends State<UploadPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  'Price:',
+                  AppText.goodsPrice,
                   style: TextStyle(
                       color: Colors.black54,
                       fontWeight: FontWeight.bold,
@@ -495,29 +496,29 @@ class _UploadPageState extends State<UploadPage> {
               onPressed: () async {
                 var _price;
                 if (!(l1 || l2 || l3 || l4)) {
-                  showToast('请选择分类', position: ToastPosition.bottom);
+                  showToast(AppText.chooseCategory, position: ToastPosition.bottom);
                   return;
                 }
                 if (!(c1 || c2 || c3 || c4)) {
-                  showToast('请选择位置', position: ToastPosition.bottom);
+                  showToast(AppText.chooseLocation, position: ToastPosition.bottom);
                   return;
                 }
                 try {
                   _price = double.parse(_gPri.text).floor();
                 } catch (e) {
-                  showToast('价格错误', position: ToastPosition.bottom);
+                  showToast(AppText.priceError, position: ToastPosition.bottom);
                   return;
                 }
                 if (_gName.text.length <= 2 || _gDec.text.length <= 10) {
-                  showToast('详情/商品名 太少啦，再多说点吧', position: ToastPosition.bottom);
+                  showToast(AppText.tooSmallText, position: ToastPosition.bottom);
                   return;
                 }
                 if (images.length == 0) {
-                  showToast('来张图片吧');
+                  showToast(AppText.tooSmallPic);
                   return;
                 }
                 if (_connectivityResult == ConnectivityResult.none) {
-                  showToast('网络似乎有问题呢！');
+                  showToast(AppText.netError1);
                   return;
                 }
                 print(_connectivityResult);
@@ -527,14 +528,14 @@ class _UploadPageState extends State<UploadPage> {
                       barrierDismissible: false,
                       builder: (context) {
                         return CupertinoAlertDialog(
-                          title: Text('提示'),
-                          content: Text('当前处于移动网络，可能花费大量流量，确定上传吗？'),
+                          title: Text(AppText.hint),
+                          content: Text(AppText.mobile),
                           actions: <Widget>[
                             FlatButton(
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: Text('取消')),
+                                child: Text(AppText.cancle)),
                             FlatButton(
                                 onPressed: () {
                                   Navigator.pop(context);
@@ -667,7 +668,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                   .spaceBetween,
                                                           children: <Widget>[
                                                             Text(
-                                                              '获取Token:',
+                                                              AppText.getToken,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .black54,
@@ -678,7 +679,7 @@ class _UploadPageState extends State<UploadPage> {
                                                             ),
                                                             isGetToken
                                                                 ? Text(
-                                                                    '获取成功',
+                                                                    AppText.getSuccess,
                                                                     style: TextStyle(
                                                                         color: Colors
                                                                             .greenAccent,
@@ -701,7 +702,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                   .spaceBetween,
                                                           children: <Widget>[
                                                             Text(
-                                                              'Token解密:',
+                                                              AppText.tokenDecryption,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .black54,
@@ -712,7 +713,7 @@ class _UploadPageState extends State<UploadPage> {
                                                             ),
                                                             isJiMi
                                                                 ? Text(
-                                                                    '解密成功',
+                                                                    AppText.decryptionSuccess,
                                                                     style: TextStyle(
                                                                         color: Colors
                                                                             .greenAccent,
@@ -734,7 +735,7 @@ class _UploadPageState extends State<UploadPage> {
                                                         child: Text.rich(
                                                             TextSpan(children: [
                                                           TextSpan(
-                                                            text: '图片数量: ',
+                                                            text: AppText.picCount,
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .black54,
@@ -753,7 +754,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                   fontSize:
                                                                       17)),
                                                           TextSpan(
-                                                            text: '     总大小: ',
+                                                            text: AppText.totalCount,
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .black54,
@@ -765,7 +766,7 @@ class _UploadPageState extends State<UploadPage> {
                                                           TextSpan(
                                                               text: totalSize ==
                                                                       0
-                                                                  ? '计算中'
+                                                                  ? AppText.jiSuan
                                                                   : '${(totalSize / 1024 / 1024).toString().substring(0, 6)}Mb',
                                                               style: TextStyle(
                                                                   color: Colors
@@ -803,7 +804,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                           Text.rich(
                                                                               TextSpan(children: [
                                                                             TextSpan(
-                                                                              text: '正在上传第 ',
+                                                                              text: AppText.uploadHint1,
                                                                               style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                             TextSpan(
@@ -811,14 +812,14 @@ class _UploadPageState extends State<UploadPage> {
                                                                               style: TextStyle(color: Colors.blueAccent, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                             TextSpan(
-                                                                              text: ' 张',
+                                                                              text: AppText.uploadHint2,
                                                                               style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                           ])),
                                                                           Text.rich(
                                                                               TextSpan(children: [
                                                                             TextSpan(
-                                                                              text: '还剩 ',
+                                                                              text: AppText.uploadHint3,
                                                                               style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                             TextSpan(
@@ -826,7 +827,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                               style: TextStyle(color: Colors.blueAccent, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                             TextSpan(
-                                                                              text: ' 张',
+                                                                              text: AppText.uploadHint2,
                                                                               style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
                                                                             ),
                                                                           ])),
@@ -886,9 +887,9 @@ class _UploadPageState extends State<UploadPage> {
                                                                     (ctx2) {
                                                                   return CupertinoAlertDialog(
                                                                     title: Text(
-                                                                        '提示！'),
+                                                                        AppText.hint),
                                                                     content: Text(
-                                                                        '中断上传吗？'),
+                                                                        AppText.uploadPause),
                                                                     actions: <
                                                                         Widget>[
                                                                       FlatButton(
@@ -897,7 +898,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                             Navigator.pop(ctx2);
                                                                           },
                                                                           child:
-                                                                              Text('否')),
+                                                                              Text(AppText.no)),
                                                                       FlatButton(
                                                                           onPressed:
                                                                               () {
@@ -907,7 +908,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                             Navigator.pop(context);
                                                                           },
                                                                           child:
-                                                                              Text('是'))
+                                                                              Text(AppText.yes))
                                                                     ],
                                                                   );
                                                                 });
@@ -923,7 +924,7 @@ class _UploadPageState extends State<UploadPage> {
                                                             alignment: Alignment
                                                                 .center,
                                                             child: Text(
-                                                              '取消',
+                                                              AppText.cancle,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .white),
@@ -949,7 +950,7 @@ class _UploadPageState extends State<UploadPage> {
                                         );
                                       });
                                 },
-                                child: Text('继续'))
+                                child: Text(AppText.jiXu))
                           ],
                         );
                       });
@@ -1007,7 +1008,7 @@ class _UploadPageState extends State<UploadPage> {
                                             arguments: result.data['data']
                                                 ['gId']);
                                       } else {
-                                        showToast('上传失败');
+                                        showToast(AppText.uploadFailed);
                                         Navigator.pop(context);
                                       }
                                     }
@@ -1049,7 +1050,7 @@ class _UploadPageState extends State<UploadPage> {
                                         width: double.infinity,
                                         margin: EdgeInsets.only(bottom: 10),
                                         child: Text(
-                                          '开始上传图片',
+                                          AppText.startUpload,
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontWeight: FontWeight.bold,
@@ -1062,7 +1063,7 @@ class _UploadPageState extends State<UploadPage> {
                                               MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             Text(
-                                              '获取Token:',
+                                              AppText.getToken,
                                               style: TextStyle(
                                                   color: Colors.black54,
                                                   fontSize: 15,
@@ -1070,7 +1071,7 @@ class _UploadPageState extends State<UploadPage> {
                                             ),
                                             isGetToken
                                                 ? Text(
-                                                    '获取成功',
+                                                    AppText.getSuccess,
                                                     style: TextStyle(
                                                         color:
                                                             Colors.greenAccent,
@@ -1091,7 +1092,7 @@ class _UploadPageState extends State<UploadPage> {
                                               MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             Text(
-                                              'Token解密:',
+                                              AppText.tokenDecryption,
                                               style: TextStyle(
                                                   color: Colors.black54,
                                                   fontSize: 15,
@@ -1099,7 +1100,7 @@ class _UploadPageState extends State<UploadPage> {
                                             ),
                                             isJiMi
                                                 ? Text(
-                                                    '解密成功',
+                                                    AppText.decryptionSuccess,
                                                     style: TextStyle(
                                                         color:
                                                             Colors.greenAccent,
@@ -1118,7 +1119,7 @@ class _UploadPageState extends State<UploadPage> {
                                         alignment: Alignment.centerLeft,
                                         child: Text.rich(TextSpan(children: [
                                           TextSpan(
-                                            text: '图片数量: ',
+                                            text: AppText.picCount,
                                             style: TextStyle(
                                                 color: Colors.black54,
                                                 fontSize: 15,
@@ -1130,7 +1131,7 @@ class _UploadPageState extends State<UploadPage> {
                                                   color: Colors.blueAccent,
                                                   fontSize: 17)),
                                           TextSpan(
-                                            text: '     总大小: ',
+                                            text: AppText.totalCount,
                                             style: TextStyle(
                                                 color: Colors.black54,
                                                 fontSize: 15,
@@ -1138,7 +1139,7 @@ class _UploadPageState extends State<UploadPage> {
                                           ),
                                           TextSpan(
                                               text: totalSize == 0
-                                                  ? '计算中'
+                                                  ? AppText.jiSuan
                                                   : '${(totalSize / 1024 / 1024).toString().substring(0, 6)}Mb',
                                               style: TextStyle(
                                                   color: Colors.blueAccent)),
@@ -1169,8 +1170,7 @@ class _UploadPageState extends State<UploadPage> {
                                                           Text.rich(TextSpan(
                                                               children: [
                                                                 TextSpan(
-                                                                  text:
-                                                                      '正在上传第 ',
+                                                                  text:AppText.uploadHint1,
                                                                   style: TextStyle(
                                                                       color: Colors
                                                                           .black54,
@@ -1193,7 +1193,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                               .w500),
                                                                 ),
                                                                 TextSpan(
-                                                                  text: ' 张',
+                                                                  text: AppText.uploadHint2,
                                                                   style: TextStyle(
                                                                       color: Colors
                                                                           .black54,
@@ -1207,7 +1207,7 @@ class _UploadPageState extends State<UploadPage> {
                                                           Text.rich(TextSpan(
                                                               children: [
                                                                 TextSpan(
-                                                                  text: '还剩 ',
+                                                                  text: AppText.uploadHint3,
                                                                   style: TextStyle(
                                                                       color: Colors
                                                                           .black54,
@@ -1230,7 +1230,7 @@ class _UploadPageState extends State<UploadPage> {
                                                                               .w500),
                                                                 ),
                                                                 TextSpan(
-                                                                  text: ' 张',
+                                                                  text: AppText.uploadHint2,
                                                                   style: TextStyle(
                                                                       color: Colors
                                                                           .black54,
@@ -1294,14 +1294,14 @@ class _UploadPageState extends State<UploadPage> {
                                                 context: context,
                                                 builder: (ctx2) {
                                                   return CupertinoAlertDialog(
-                                                    title: Text('提示！'),
-                                                    content: Text('中断上传吗？'),
+                                                    title: Text(AppText.hint),
+                                                    content: Text(AppText.uploadPause),
                                                     actions: <Widget>[
                                                       FlatButton(
                                                           onPressed: () {
                                                             Navigator.pop(ctx2);
                                                           },
-                                                          child: Text('否')),
+                                                          child: Text(AppText.no)),
                                                       FlatButton(
                                                           onPressed: () {
                                                             QiNiu()
@@ -1311,7 +1311,7 @@ class _UploadPageState extends State<UploadPage> {
                                                             Navigator.pop(
                                                                 context);
                                                           },
-                                                          child: Text('是'))
+                                                          child: Text(AppText.yes))
                                                     ],
                                                   );
                                                 });
@@ -1323,7 +1323,7 @@ class _UploadPageState extends State<UploadPage> {
                                             height: setHeight(50),
                                             alignment: Alignment.center,
                                             child: Text(
-                                              '取消',
+                                              AppText.cancle,
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
@@ -1349,7 +1349,7 @@ class _UploadPageState extends State<UploadPage> {
                 width: double.infinity,
                 height: 50,
                 child: Text(
-                  '提交',
+                  AppText.submit,
                   style: TextStyle(
                       letterSpacing: 10,
                       fontSize: 17,
@@ -1399,7 +1399,7 @@ class QiNiu {
               i++;
               run();
             }, onError: (e) {
-              showToast('出错啦,请重新上传\n$e',
+              showToast(AppText.uploadFailed,
                   duration: Duration(seconds: 6),
                   position: ToastPosition.bottom);
             });

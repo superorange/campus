@@ -16,9 +16,10 @@ import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:jverify/jverify.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
+// ignore: must_be_immutable
 class LoginPage extends StatelessWidget {
-  Jverify jverify = Jverify();
   Shader shader;
+  final Jverify jverify = Jverify();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,7 +142,8 @@ class ChooseLoginPanel extends StatelessWidget {
           ),
           FlatButton(
             onPressed: () {
-              Navigator.pushNamed(context, RouteName.smsLogin);
+              showToast('暂停使用');
+//              Navigator.pushNamed(context, RouteName.smsLogin);
             },
             child: Container(
               width: double.infinity,

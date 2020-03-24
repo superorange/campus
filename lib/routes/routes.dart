@@ -50,7 +50,7 @@ class AppRoute {
       case RouteName.tradeSearchPage:
         return DefaultRoute(child: TradePage());
       case RouteName.tradeListPage:
-        return DefaultRoute(child: TradeListPage(settings.arguments));
+        return DefaultRoute(child: TradeSearchPage(settings.arguments));
       case RouteName.tradeInformationPage:
         return DefaultRoute(child: TradeOnePage(settings.arguments));
       case RouteName.smsLogin:

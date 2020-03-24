@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/global_config.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,20 +12,33 @@ class SplashPage extends StatefulWidget {
   _SplashPageState createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>{
+class _SplashPageState extends State<SplashPage>with TickerProviderStateMixin{
+  static AnimationController _animationController;
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
   @override
   void initState() {
-    GlobalConfig().initGlobalConfig().then((val){
-      if(val){
-        Future.delayed(Duration(milliseconds: 3500)).then((_) {
-          Navigator.pushNamedAndRemoveUntil(
-              context, RouteName.index, ModalRoute.withName('/'));
-        });
-      }
-      else{
-        showToast('Sorry,this app can\'t run in this device');
-      }
-    });
+    _animationController = AnimationController(vsync: this);
+   _animationController.addListener((){
+     if(_animationController.status==AnimationStatus.completed){
+       GlobalConfig().initGlobalConfig().then((val){
+         if(val){
+           Navigator.pushNamedAndRemoveUntil(
+               context, RouteName.index, ModalRoute.withName('/'));
+         }
+         else{
+           showToast(AppText.appError,duration: Duration(seconds: 5));
+           Future.delayed(const Duration( seconds: 5)).then((_){
+              exit(0);
+           });
+         }
+       });
+     }
+  });
+
     super.initState();
   }
 
@@ -38,11 +53,17 @@ class _SplashPageState extends State<SplashPage>{
                 repeat: false,
                 fit: BoxFit.fitWidth,
                 width: double.infinity,
+                onLoaded: (composition){
+                  _animationController
+                    ..duration = composition.duration
+                    ..forward();
+                },
                 alignment: Alignment.center),
             flex: 2,
             fit: FlexFit.tight,
+
           ),
-          Text('闲货直通车',style: TextStyle(
+          Text(AppText.appName,style: TextStyle(
               color: Colors.brown,
               fontSize: 35,
               fontWeight: FontWeight.bold,
@@ -51,7 +72,7 @@ class _SplashPageState extends State<SplashPage>{
           Flexible(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Text('Copyright© 2020 FLUTTER',style: TextStyle(
+              child: Text(AppText.appCopyright,style: TextStyle(
                   color: Colors.grey,
                   fontSize: 15,
                   fontWeight: FontWeight.w400

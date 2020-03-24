@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/screen_config.dart';
 
@@ -16,7 +17,7 @@ class _UploadPageOkState extends State<UploadPageOk> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('上传成功！'),
+        title: Text(AppText.uploadSuccess),
       ),
       body: Column(
         children: <Widget>[
@@ -42,7 +43,7 @@ class _UploadPageOkState extends State<UploadPageOk> {
               },
               color: Colors.yellow,
               child: Container(
-                child: Text('看看新上传的宝贝'),
+                child: Text(AppText.lookNew),
               )),
         ],
       ),

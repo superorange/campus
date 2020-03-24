@@ -90,8 +90,9 @@ class _ChattersPageState extends State<ChattersPage>
                         child: Row(
                           children: <Widget>[
                             Container(
-                              width: 40,
-                              height: double.infinity,
+                              width: 50,
+                              height: 50,
+                              alignment: Alignment.center,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(3),
                                 child: CachedNetworkImage(

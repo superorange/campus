@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/config/api/api.dart';
+import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/pages/person_page.dart';
 import 'package:flutter_app/pages/trade_page.dart';
 import 'package:flutter_app/pages/vm/chat_chatters_vm.dart';
@@ -43,14 +44,14 @@ class _IndexPageState extends State<IndexPage> {
         },
         cancelOnError: false,
         onDone: () {
-          showToast('与服务器断开连接');
+          showToast(AppText.loseConnect);
         },
         onError: (e, s) {
-          showToast('与服务器断开连接');
+          showToast(AppText.loseConnect);
         });
     Provider.of<PersonPageVm>(context, listen: false).loading().then((val) {
       if (val == LoginState.LoginFailed) {
-        showToast('登录过期，请重新登录',
+        showToast(AppText.loginExpire,
             duration: Duration(seconds: 5),
             backgroundColor: Colors.black,
             textStyle: TextStyle(
@@ -90,11 +91,11 @@ class _IndexPageState extends State<IndexPage> {
             type: BottomNavigationBarType.fixed,
             items: [
               BottomNavigationBarItem(
-                  icon: Icon(Icons.search), title: Text('首页')),
+                  icon: Icon(Icons.search), title: Text(AppText.appHome)),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.message), title: Text('消息')),
+                  icon: Icon(Icons.message), title: Text(AppText.appMessage)),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.person), title: Text('个人')),
+                  icon: Icon(Icons.person), title: Text(AppText.appPerson)),
             ]);
       }),
     );
