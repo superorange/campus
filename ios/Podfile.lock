@@ -24,7 +24,7 @@ PODS:
     - Flutter
     - JCore
     - JVerification
-  - multi_image_picker (4.6.3):
+  - multi_image_picker (4.6.4):
     - BSImagePicker (~> 2.10.3)
     - Flutter
   - path_provider (0.0.1):
@@ -88,11 +88,11 @@ SPEC CHECKSUMS:
   JCore: dd8877f3adea559b60afdb0c77a8fa771c03b649
   JVerification: 0d0b4474a250f19ef2bc45da7bd0d0e151350012
   jverify: 39f3e355cdb0d7c03fd2f8497ea11b273339547f
-  multi_image_picker: b91a71242dfc28c46cae91c86774ba04ac8e7519
+  multi_image_picker: 1651732277b2db3b09e83f3be8eb7ea65cf2a933
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
 
-PODFILE CHECKSUM: 8f8c861fcb052da2e8967f107e8931ee7ae35f38
+PODFILE CHECKSUM: 474313b5a4798cc74babb44e36bdf3bbbea9a318
 
 COCOAPODS: 1.8.4
