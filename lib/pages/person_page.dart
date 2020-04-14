@@ -35,6 +35,7 @@ class _PersonPageState extends State<PersonPage>
         child: Scaffold(
           body: Consumer<PersonPageVm>(builder: (context, vm, _) {
             if (vm.user == null) {
+              
 
               return InkWell(
               onTap: () {
