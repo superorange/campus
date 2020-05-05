@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/database/database_manager.dart';
 import 'package:flutter_app/database/user_dababase.dart';
 
@@ -8,16 +9,12 @@ class GlobalConfig {
   GlobalConfig._init();
   factory GlobalConfig() => _globalConfig ??= GlobalConfig._init();
   Future initSqlite() async {
-    return await DataBaseManager().init().catchError((e) {
-      throw e;
-    });
+    return  DataBaseManager().init();
   }
 
   Future initHive() async {
     return await UserDataBase().init().then((_) {
       UserDataBase().setUserState();
-    }, onError: (e) {
-      throw e;
     });
   }
 

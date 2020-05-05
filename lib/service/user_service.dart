@@ -12,13 +12,7 @@ class UserService extends BaseService {
     });
   }
 
-  Future<Response> smsLogin({@required var data}) {
-    return dio.post(Api.smsLogin, data: data).then((val) {
-      return val;
-    }, onError: (e) {
-      throw e;
-    });
-  }
+  Future<Response> smsLogin({@required var data}) =>dio.post(Api.smsLogin, data: data);
 
   Future<Response> pwdLogin({@required var data}) {
     return dio.post(Api.pwdLogin, data: data).then((val) {
@@ -60,10 +54,41 @@ class UserService extends BaseService {
     });
   }
 
+  Future<Response> getGoodsCollection({@required String userId}) {
+    return dio.get(Api.goodsCollection+'/$userId').then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
+  Future<Response> myGoods(String userId){
+    return dio.get(Api.myGoods+'/$userId').then((val){
+      return val;
+    },onError: (e){
+      throw e;
+    });
+
+  }
+  Future<Response> deleteMyGoods(Map data){
+    return dio.put(Api.myGoods,data: data).then((val){
+      return val;
+    },onError: (e){
+      throw e;
+    });
+
+  }
+
   Future<Response> goodsReport({@required var data}) {
     return dio.get(Api.goodsReport, queryParameters: data).then((val) {
       return val;
     }, onError: (e) {
+      throw e;
+    });
+  }
+  Future<Response> getUser(String userId){
+    return dio.get(Api.user+'/$userId').then((val){
+      return val;
+    },onError: (e){
       throw e;
     });
   }

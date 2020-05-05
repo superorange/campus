@@ -39,6 +39,7 @@ class GoodsModel {
   String gId;
   String gName;
   String gDec;
+  String mainPic;
   List<String> gImages;
   int gStar;
   String createTime;
@@ -56,6 +57,7 @@ class GoodsModel {
       this.gId,
       this.gName,
       this.gDec,
+        this.mainPic,
       this.gImages,
       this.gStar,
       this.createTime,
@@ -80,6 +82,7 @@ class GoodsModel {
     schoolLocation = json['schoolLocation'];
     category = json['category'];
     sign = json['sign'];
+    mainPic=json['mainPic'];
   }
 
   Map<String, dynamic> toJson() {
@@ -99,6 +102,7 @@ class GoodsModel {
     data['schoolLocation'] = this.schoolLocation;
     data['category'] = this.category;
     data['sign'] = this.sign;
+    data['mainPic']=mainPic;
     return data;
   }
 }

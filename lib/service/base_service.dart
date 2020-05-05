@@ -11,6 +11,7 @@ class BaseService {
       baseUrl: Api.baseUrl,
       receiveTimeout: 6000,
       connectTimeout: 5000,
+      receiveDataWhenStatusError: true,
       headers: {'Authorization': Api.token},
     );
     dio = Dio(baseOptions);
@@ -22,14 +23,15 @@ class BaseService {
           msg: res.headers,
         );
         Log.pt(msg: res.queryParameters, flag: 'queryParameters');
+
         Log.pt(msg: res.data, flag: 'data');
       },
       onResponse: (res) {
         Log.pt(flag: '收到数据', msg: res.data);
       },
-//    onError: (res){
-//      Log.pt(flag: '网络出错', msg: res.response.data);
-//    }
+    onError: (res){
+      Log.pt(flag: '网络出错', msg: res.error);
+    }
     ));
   }
 }

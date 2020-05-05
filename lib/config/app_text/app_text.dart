@@ -1,5 +1,7 @@
 class AppText{
 
+  static const seeComments ="查看评论:";
+  static const totalComments =" 条评论";
 
   static const chat ="聊天";
   static const uploadHint1 ="正在上传第 ";
@@ -19,9 +21,9 @@ class AppText{
   static const note2 ="已关注";
   static const note1 ="关注";
 
-  static const goodsName ="物品名:    ";
-  static const goodsDec ="详情：  ";
-  static const goodsLocation ="商品位置";
+  static const goodsName ="品名: ";
+  static const goodsDec ="详情: ";
+  static const goodsLocation ="位置: ";
   static const ly ="留言";
   static const collection1 ="收藏";
   static const collection2 = "已收藏";
@@ -75,7 +77,7 @@ class AppText{
   static const qiTaLocation ="其它位置";
 
 
-  static const appError = "Sorry,this app can't run in this device,the app will exit after 5 seconds";
+  static const appError = "抱歉App不能在此设备运行，将在5s后退出";
   static const appName = "闲货直通车";
   static const appCopyright = "Copyright© 2020 FLUTTER";
   static const loseConnect ="与服务器断开连接";

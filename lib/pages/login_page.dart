@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/config/api/api.dart';
 import 'package:flutter_app/database/user_dababase.dart';
 import 'package:flutter_app/model/base_model.dart';
 import 'package:flutter_app/model/login_model.dart';
@@ -22,27 +23,34 @@ class LoginPage extends StatelessWidget {
   final Jverify jverify = Jverify();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        elevation: .0,
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(image: AssetImage('assets/images/login_background.jpg'),
+        fit: BoxFit.cover)
       ),
-      body: Padding(padding: EdgeInsets.only(
-        left: 25,right: 25
-      ),child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Flexible(child: Align(child: Text('闲货直通车',style: TextStyle(
-              color: Colors.brown,
-              fontSize: 35,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 3
-          ),),alignment: Alignment(0,-0.5),),flex: 1,fit: FlexFit.tight,),
-          Flexible(child:  ChooseLoginPanel(),flex: 2,fit: FlexFit.tight,),
-        ],
-      ),),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: true,
+          elevation: .0,
+        ),
+        body: Padding(padding: EdgeInsets.only(
+            left: 25,right: 25
+        ),child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Flexible(child: Align(child: Text('闲货直通车',style: TextStyle(
+                color: Colors.greenAccent,
+                fontSize: 35,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 3
+            ),),alignment: Alignment(0,-0.5),),flex: 1,fit: FlexFit.tight,),
+            Flexible(child:  ChooseLoginPanel(),flex: 2,fit: FlexFit.tight,),
+          ],
+        ),),
+      ),
     );
   }
 }
@@ -56,11 +64,10 @@ class ChooseLoginPanel extends StatelessWidget {
       Jverify jverify = new Jverify();
       try {
         jverify.setup(
-            appKey: "477d2dad7d19abe2ae0b42f6", channel: "devloper-default");
+            appKey: Api.JLoginKEy, channel: "devloper-default");
       } catch (e) {
         print('极光初始化失败：$e');
       } // 初始化sdk,  appKey 和 channel 只对ios设置有效
-      jverify.setDebugMode(true);
       var init = await jverify.isInitSuccess();
       var net = await jverify.checkVerifyEnable();
       var preLogin = await jverify.preLogin();
@@ -127,14 +134,14 @@ class ChooseLoginPanel extends StatelessWidget {
               height: 50,
               alignment: Alignment.center,
               child: Text(
-                '本机号码一键登录',
+                '本机号码一键登录/注册',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 17),
               ),
             ),
-            color: Colors.blue,
+            color: Colors.white70.withOpacity(0.2),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           SizedBox(
@@ -142,22 +149,21 @@ class ChooseLoginPanel extends StatelessWidget {
           ),
           FlatButton(
             onPressed: () {
-              showToast('暂停使用');
-//              Navigator.pushNamed(context, RouteName.smsLogin);
+              Navigator.pushNamed(context, RouteName.smsLogin);
             },
             child: Container(
               width: double.infinity,
               height: 50,
               alignment: Alignment.center,
               child: Text(
-                '短信验证码登录',
+                '短信验证码登录/注册',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 17),
               ),
             ),
-            color: Colors.blue,
+            color: Colors.white70.withOpacity(0.2),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           SizedBox(
@@ -174,12 +180,12 @@ class ChooseLoginPanel extends StatelessWidget {
               child: Text(
                 '密码登录',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 17),
               ),
             ),
-            color: Colors.blue,
+            color: Colors.white70.withOpacity(0.2),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -222,9 +228,11 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin {
         child: ChangeNotifierProvider.value(
           value: smsLoginVm,
           child: Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               automaticallyImplyLeading: true,
               elevation: .0,
+
             ),
             body: SafeArea(
                 child: Container(
@@ -268,7 +276,7 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin {
                         })),
                         Consumer<SmsLoginVm>(builder: (context, vm, _) {
                           return Container(
-                            width: setWidth(200),
+                            width: setWidth(250),
                             color: (!vm.sendSms && vm.canClick)
                                 ? Colors.blueAccent
                                 : Colors.grey[400],
@@ -281,11 +289,9 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin {
                                               context: context,
                                               builder: (ctx) {
                                                 var data = {
-                                                  "type": "sms",
-                                                  "phone": _phoneController
-                                                      .value.text,
-                                                  "smsCode": "123456",
-                                                  "lastLogin": false
+                                                  "code": 200,
+                                                  "phone": _phoneController.value.text,
+                                                  "smsCode": "",
                                                 };
                                                 UserService()
                                                     .smsLogin(data: data)
@@ -308,10 +314,7 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin {
                                                   showToast('短信发送失败');
                                                 });
 
-                                                return AlertDialog(
-                                                  title:
-                                                      CupertinoActivityIndicator(),
-                                                );
+                                                return CupertinoActivityIndicator();
                                               });
                                         } else {
                                           showToast('号码格式不正确！');
@@ -368,101 +371,62 @@ class _SmsLoginState extends State<SmsLogin> with TickerProviderStateMixin {
                     height: 20,
                   ),
                   Consumer<SmsLoginVm>(builder: (context, vm, _) {
-                    return GestureDetector(
-                      onPanUpdate: vm.canLogin
-                          ? (d) {
-                              vm.changeAnimationControl(false);
-                              if (d.localPosition.dx >= 60) {
-                                vm.changeWidth(d.localPosition.dx);
-                              }
-                            }
-                          : null,
-                      onPanEnd: vm.canLogin
-                          ? (d) {
-                              if (vm.width >= 300) {
-                                vm
-                                  ..changeWidth(395, listen: false)
-                                  ..changeStartLogin(true);
-                                var data = {
-                                  "type": "sms",
-                                  "phone": _phoneController.value.text,
-                                  "smsCode": _codeController.value.text,
-                                  "lastLogin": true
-                                };
-                                UserService().smsLogin(data: data).then((val) {
-                                  BaseModel model =
-                                      BaseModel.fromJson(val.data);
-                                  if (model.code == 200) {
-                                    var user = UserModel.fromJson(model.data);
-                                    UserDataBase()
-                                        .insertUser(user, model.token);
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        RouteName.index,
-                                        ModalRoute.withName('/'));
-                                  } else {
-                                    showToast('登录失败');
-                                    vm.changeAnimationControl(false);
-                                    vm
-                                      ..changeWidth(60)
-                                      ..changeStartLogin(false);
-                                  }
-                                }, onError: (e) {
-                                  showToast('登录失败');
-                                  vm.changeAnimationControl(false);
-                                  vm
-                                    ..changeWidth(60)
-                                    ..changeStartLogin(false);
-                                });
-                              } else if (vm.width > 60 && vm.width < 300) {
-                                vm
-                                  ..setWidth(vm.width)
-                                  ..changeAnimationControl(true);
-                                _animationController.reverse(from: 1);
-                              }
-                            }
-                          : null,
+                    return InkWell(
+                     onTap: (){
+                       vm.changeStartLogin(true);
+                       var data={
+                         'code':201,
+                         'phone':_phoneController.text,
+                         'smsCode':_codeController.text
+                       };
+                       UserService().smsLogin(data: data).then((val) {
+                         BaseModel model;
+                         try {
+                            model=
+                                                    BaseModel.fromJson(val.data);
+                         } catch (e) {
+                           print('e:$e');
+                         }
+                         if (model.code == 200) {
+                           var user = UserModel.fromJson(model.data);
+                           UserDataBase()
+                               .insertUser(user, model.token);
+                           Navigator.pushNamedAndRemoveUntil(
+                               context,
+                               RouteName.index,
+                               ModalRoute.withName('/'));
+                         } else {
+                           showToast('验证码错误');
+                           vm.changeAnimationControl(false);
+                           vm
+                             ..changeWidth(60)
+                             ..changeStartLogin(false);
+                         }
+                       }, onError: (e) {
+                         showToast('网络不好，再试一次吧');
+                         vm.changeStartLogin(false);
+                       });
+                     },
                       child: Container(
                         height: 50,
-                        margin: EdgeInsets.only(left: 20, right: 20),
-                        color: vm.startLogin
-                            ? Colors.blueAccent
-                            : Colors.grey[400],
-                        width: double.infinity,
+
+                        color:Colors.blue.withOpacity(0.8),
+
+                        width: MediaQuery.of(context).size.width-40,
                         child: AnimatedSwitcher(
                           duration: Duration(seconds: 1),
                           child: vm.startLogin
                               ? CupertinoActivityIndicator(
-                                  key: ValueKey(vm.startLogin),
+                                  key: ValueKey('true'),
                                 )
-                              : Stack(
-                                  key: ValueKey(vm.startLogin),
-                                  children: <Widget>[
-                                    Container(
-                                      width: double.infinity,
-                                      alignment: Alignment.center,
-                                      child: Text('按压拖动登录'),
-                                    ),
-                                    AnimatedBuilder(
-                                        animation: _animationController,
-                                        builder: (context, _) {
-                                          return Container(
-                                            color: Colors.blueAccent,
-                                            width: vm.animationControl
-                                                ? 60 +
-                                                    _animationController.value *
-                                                        (vm.lastWidth - 60)
-                                                : vm.width,
-                                            alignment: Alignment.centerRight,
-                                            child: Text(
-                                              '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.clip,
-                                            ),
-                                          );
-                                        }),
-                                  ],
-                                ),
+                              : Container(
+                            key: ValueKey('false'),
+                            width: double.infinity,
+                            alignment: Alignment.center,
+                            child: Text('登录',style: Theme.of(context).textTheme.title.copyWith(
+                              color: Colors.white
+                            ),),
+                          ),
                         ),
                       ),
                     );
@@ -494,7 +458,7 @@ class PwdLogin extends StatelessWidget {
   Shader shader;
   @override
   Widget build(BuildContext context) {
-    Gradient gradient =
+    const Gradient gradient =
         LinearGradient(colors: [Colors.deepPurpleAccent, Colors.greenAccent]);
     shader = gradient
         .createShader(Rect.fromLTRB(0, 0, setHeight(200), setWidth(100)));
@@ -534,6 +498,7 @@ class PwdLogin extends StatelessWidget {
                       color: Colors.grey[200],
                       child: TextField(
                         keyboardType: TextInputType.phone,
+                        autofocus: false,
                         decoration: InputDecoration(
                           hintText: '手机号',
                           suffixIcon: Icon(
@@ -589,9 +554,22 @@ class PwdLogin extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                              showDialog(context: context,builder: (context){
+                                return AlertDialog(
+                                  title: Text('忘记密码'),
+                                   content: Text('请使用验证码登录后修改密码！'),
+                                  actions: <Widget>[
+                                    FlatButton(onPressed: (){
+                                      Navigator.pop(context);
+
+                                    }, child: Text('OK',style: Theme.of(context).textTheme.button,))
+                                  ],
+                                );
+                              });
+                          },
                           child: Text(
-                            'Forgot Password?',
+                            '忘记密码？',
                             style: TextStyle(color: Colors.grey, fontSize: 13),
                           ),
                         ),
@@ -602,9 +580,8 @@ class PwdLogin extends StatelessWidget {
                     ),
                     Align(
                       alignment: Alignment.center,
-                      child: FlatButton(
-                          color: Colors.blueAccent,
-                          onPressed: vm.permitLogin
+                      child: InkWell(
+                          onTap: vm.permitLogin
                               ? () {
                                   vm.loginProcess = true;
                                   _pwdFocusNode.unfocus();
@@ -632,6 +609,8 @@ class PwdLogin extends StatelessWidget {
                                 }
                               : null,
                           child: Container(
+                              width: double.infinity,
+                              color: vm.permitLogin?Colors.blue:Colors.grey,
                               height: 50,
                               alignment: Alignment.center,
                               child: vm.loginProcess

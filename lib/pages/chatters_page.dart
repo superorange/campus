@@ -109,6 +109,7 @@ class _ChattersPageState extends State<ChattersPage>
                                 width: double.infinity,
                                 margin: EdgeInsets.only(left: 10),
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
@@ -117,10 +118,18 @@ class _ChattersPageState extends State<ChattersPage>
                                           color: Colors.black,
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold),
-                                    )
+                                    ),
+                                    vm.lastMsg[vm.chatters[index].userId]==null?Container():Text('新消息：${vm.lastMsg[vm.chatters[index].userId]}',style:Theme.of(context).textTheme.caption.copyWith(
+                                        color: Colors.red
+                                    )),
                                   ],
                                 ),
                               ),
+                            ),
+                            vm.lastMsgLength[vm.chatters[index].userId]==null?Container(): CircleAvatar(
+                              radius: 10,
+                              backgroundColor: Colors.red,
+                              child: Text(vm.lastMsgLength[vm.chatters[index].userId].toString(),),
                             ),
                           ],
                         ),

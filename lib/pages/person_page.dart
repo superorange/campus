@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/config/font/font_style.dart';
 import 'package:flutter_app/pages/vm/person_page_vm.dart';
@@ -104,7 +105,8 @@ class _PersonPageState extends State<PersonPage>
                                               context: context,
                                               builder: (context) {
                                                 return ModifyInformationWidget(
-                                                    '修改用户名', '请输入新用户名',
+                                                    '修改用户名', '请输入新用户名(4-20个字符)',maxTextLength: 20,
+                                                    minTextLength: 4,
                                                     onCancel: () {
                                                   Navigator.pop(context);
                                                 }, onClick: (val) {
@@ -135,7 +137,8 @@ class _PersonPageState extends State<PersonPage>
                                         context: context,
                                         builder: (context) {
                                           return ModifyInformationWidget(
-                                              '修改个性签名', '请输入新个性签名',
+                                              '修改个性签名', '请输入新个性签名(30字以内)',
+                                              maxTextLength: 30,
                                               onCancel: () {
                                                 Navigator.pop(context);
                                               }, onClick: (val) {
@@ -260,21 +263,27 @@ class _PersonPageState extends State<PersonPage>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          TABWidget(
-                              t: Text('${vm.user.collection}'),
-                              b: Text(
-                                '收藏',
-                                style: AppStyle.personPageStyle(),
-                              )),
-                          TABWidget(
-                              t: Text('${vm.user.fans}'),
-                              b: Text('粉丝', style: AppStyle.personPageStyle())),
-                          TABWidget(
-                              t: Text('${vm.user.post}'),
-                              b: Text('帖子', style: AppStyle.personPageStyle())),
-                          TABWidget(
-                              t: Text('${vm.user.goodsCount}'),
-                              b: Text('商品', style: AppStyle.personPageStyle())),
+                          InkWell(
+                            onTap: (){
+                              Navigator.pushNamed(context, RouteName.collectionPage,arguments: vm.user.userId);
+                              print('send:${vm.user.userId}');
+                            },
+                            child: TABWidget(
+                                t: Text('${vm.user.collection}'),
+                                b: Text(
+                                  '收藏',
+                                  style: AppStyle.personPageStyle(),
+                                )),
+                          ),
+
+                          InkWell(
+                            child: TABWidget(
+                                t: Text('${vm.user.goodsCount}'),
+                                b: Text('商品', style: AppStyle.personPageStyle())),
+                            onTap: (){
+                              Navigator.pushNamed(context, RouteName.myGoodsPage);
+                            },
+                          )
                         ],
                       ),
                     ),
@@ -285,14 +294,14 @@ class _PersonPageState extends State<PersonPage>
                             context: context,
                             builder: (context) {
                               return ModifyDoubleWidget(
-                                  '修改密码', '请输入旧密码', '请输入新密码', (val) {
+                                  '修改密码', '请输入旧密码', '请输入新密码(6-16位)', (val) {
                                 vm.updateUser({
                                   'type': 'password',
                                   'password': val[1],
                                   'oldPassword': val[0]
-                                });
+                                },);
                                 Navigator.pop(context);
-                              });
+                              },minTextLength: 6,maxTextLength: 16,);
                             });
                       },
                       child: Container(
@@ -323,7 +332,8 @@ class _PersonPageState extends State<PersonPage>
                         showDialog(
                             context: context,
                             builder: (context) {
-                              return ModifyInformationWidget('修改用户名', '请输入新用户名',
+                              return ModifyInformationWidget('修改用户名', '请输入新用户名(4-20个字符)',
+                                  minTextLength: 4,maxTextLength: 20,
                                   onCancel: () {
                                 Navigator.pop(context);
                               }, onClick: (val) {
@@ -351,6 +361,8 @@ class _PersonPageState extends State<PersonPage>
                             context: context,
                             builder: (context) {
                               return ModifyInformationWidget('修改手机号', '请输入新手机号',
+                                  minTextLength: 11,
+                                  maxTextLength: 11,
                                   onCancel: () {
                                 Navigator.pop(context);
                               }, onClick: (val) {
@@ -418,7 +430,7 @@ class _PersonPageState extends State<PersonPage>
                             context: context,
                             builder: (context) {
                               return ModifyInformationWidget(
-                                  '修改个性签名', '请输入新个性签名', onCancel: () {
+                                  '修改个性签名', '请输入新个性签名(30字以内)',maxTextLength: 30, onCancel: () {
                                 Navigator.pop(context);
                               }, onClick: (val) {
                                 vm.updateUser({'type': 'sign', 'sign': val});
@@ -538,22 +550,32 @@ class ModifyInformationWidget extends StatelessWidget {
   String hintText;
   Function onClick;
   Function onCancel;
+  int minTextLength;
+  int maxTextLength;
   ModifyInformationWidget(this.title, this.hintText,
-      {this.onCancel, this.onClick});
+      {this.onCancel, this.onClick,this.maxTextLength=16,this.minTextLength=1});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('$title'),
       content: TextField(
+        maxLines: null,
         controller: _textEditingController,
-        decoration: InputDecoration(hintText: '$hintText'),
+        inputFormatters:[
+          LengthLimitingTextInputFormatter(maxTextLength),
+        ] ,
+        decoration: InputDecoration(labelText: '$hintText',
+
+            labelStyle: TextStyle(
+                color: Colors.red
+            )),
       ),
       actions: <Widget>[
         FlatButton(onPressed: () => onCancel(), child: Text('取消')),
         FlatButton(
             onPressed: () {
-              if (_textEditingController.text.length >= 4 &&
-                  _textEditingController.text.length <= 12) {
+              if (_textEditingController.text.length >= minTextLength &&
+                  _textEditingController.text.length <= maxTextLength) {
                 onClick(_textEditingController.text);
                 return;
               }
@@ -573,13 +595,16 @@ class ModifyDoubleWidget extends StatelessWidget {
   String hintText1;
   String hintText2;
   Function onClick;
-  ModifyDoubleWidget(this.title, this.hintText1, this.hintText2, this.onClick);
+  int minTextLength;
+  int maxTextLength;
+  ModifyDoubleWidget(this.title, this.hintText1, this.hintText2, this.onClick,
+  {this.maxTextLength=16,this.minTextLength=6});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('$title'),
       content: Container(
-        height: 100,
+        height: 140,
         child: Column(
           children: <Widget>[
             TextField(
@@ -588,7 +613,11 @@ class ModifyDoubleWidget extends StatelessWidget {
             ),
             TextField(
               controller: _textEditingController2,
-              decoration: InputDecoration(hintText: '$hintText2'),
+              decoration: InputDecoration(
+              labelText: '$hintText2',
+              labelStyle: TextStyle(
+                color: Colors.red
+              )),
             ),
           ],
         ),
@@ -601,10 +630,14 @@ class ModifyDoubleWidget extends StatelessWidget {
             child: Text('取消')),
         FlatButton(
             onPressed: () {
-              if (_textEditingController1.text.length >= 4 &&
-                  _textEditingController1.text.length <= 12 &&
-                  _textEditingController2.text.length >= 4 &&
-                  _textEditingController2.text.length <= 12) {
+              if(_textEditingController1.text==_textEditingController2.text){
+                showToast('新密码不能和旧密码相同');
+                return;
+              }
+              if (_textEditingController1.text.length >= minTextLength &&
+                  _textEditingController1.text.length <= maxTextLength &&
+                  _textEditingController2.text.length >= minTextLength &&
+                  _textEditingController2.text.length <= maxTextLength) {
                 onClick([
                   _textEditingController1.text,
                   _textEditingController2.text

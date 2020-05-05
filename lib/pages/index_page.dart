@@ -93,7 +93,26 @@ class _IndexPageState extends State<IndexPage> {
               BottomNavigationBarItem(
                   icon: Icon(Icons.search), title: Text(AppText.appHome)),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.message), title: Text(AppText.appMessage)),
+                  icon: Stack(
+                    fit: StackFit.loose,
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment(0, 0),
+                        child: Icon(Icons.message),
+                      ),
+                      Align(
+                        alignment: Alignment(0.2, -0.9),
+                        child:  Provider.of<ChatChattersPageVm>(context).lastMsg.keys.length>0?CircleAvatar(
+                          radius: 8,
+                          child: Text(Provider.of<ChatChattersPageVm>(context).lastMsgLength.values.reduce((v,k)=>v+k).toString(),
+                          style: TextStyle(
+                            fontSize: 10
+                          ),),
+                          backgroundColor: Colors.red,
+                        ):SizedBox(),
+                      )
+                    ],
+                  ), title: Text(AppText.appMessage)),
               BottomNavigationBarItem(
                   icon: Icon(Icons.person), title: Text(AppText.appPerson)),
             ]);

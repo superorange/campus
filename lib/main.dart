@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
             textTheme: TextTheme(
                 subhead: TextStyle(textBaseline: TextBaseline.alphabetic)),
             primaryColor: Colors.white),
-        themeMode: ThemeMode.dark,
         title: 'Campus',
         onGenerateRoute: AppRoute.generateRoute,
         initialRoute: RouteName.splashPage,

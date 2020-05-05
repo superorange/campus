@@ -14,10 +14,15 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
   List<Chatters> get chatters => _chatters;
   WebSocketUtils webSocketUtils = WebSocketUtils();
   Map<String, List<ChatMsg>> chatMapMsg = {};
+  ScrollController scrollController = ScrollController();
+  double oldPosition=0;
+  Map<String,String> lastMsg={};
+  Map<String,int> lastMsgLength={};
 
   @override
   void dispose() {
     webSocketUtils.dispose();
+
     super.dispose();
   }
 
@@ -57,6 +62,7 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
             if (!chatMapMsg.containsKey(f.toId)) {
               chatMapMsg[f.toId] = [];
             }
+
             chatMapMsg[f.toId].add(f);
           } else {
             if (!chatMapMsg.containsKey(f.userId)) {
@@ -65,6 +71,12 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
             chatMapMsg[f.userId].add(f);
           }
         });
+        if(scrollController.hasClients){
+
+          scrollController.animateTo(scrollController.position.maxScrollExtent, curve: Curves.easeOut,
+            duration: const Duration(milliseconds: 300),);
+          oldPosition=scrollController.position.maxScrollExtent;
+        }
       });
       startConnect();
     }
@@ -107,6 +119,7 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
               });
             }
           }
+
           notifyListeners();
         }
       });
@@ -141,6 +154,18 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
               model.chatMsg.first.toId,
               model.chatMsg.first.msg,
               model.chatMsg.first.sign);
+          lastMsg[model.chatMsg.first.userId]=model.chatMsg.first.msg;
+          try {
+
+            if(!lastMsgLength.containsKey(model.chatMsg.first.userId)){
+              lastMsgLength[model.chatMsg.first.userId]=0;
+            }
+            lastMsgLength[model.chatMsg.first.userId]=lastMsgLength[model.chatMsg.first.userId]+1;
+          } catch (e) {
+            debugPrint('lenth:${lastMsgLength[model.chatMsg.first.userId]}');
+            debugPrint('e:$e');
+          }
+
         }
         //历史消息
         if (model.code == 215) {
@@ -156,6 +181,16 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
         }
 
         notifyListeners();
+        if(scrollController.hasClients){
+          Future.delayed(Duration(milliseconds: 50)).then((_){
+            scrollController.animateTo(scrollController.position.maxScrollExtent, curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 300),);
+            oldPosition=scrollController.position.maxScrollExtent;
+          }
+            );
+
+
+        }
       });
     }
   }

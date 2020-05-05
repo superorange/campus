@@ -354,7 +354,7 @@ class _TradePageState extends State<TradePage>
                                               child: CachedNetworkImage(
                                                 fit: BoxFit.cover,
                                                 imageUrl:
-                                                    '${vm.goodsListModel.goodsModel[index].gImages.first}',
+                                                    '${vm.goodsListModel.goodsModel[index].mainPic}',
                                                 errorWidget: (context, s, _) =>
                                                     ImageErrorWidget(),
                                                 fadeInCurve: Curves.easeIn,
@@ -503,7 +503,11 @@ class MyHeader extends SliverPersistentHeaderDelegate {
                   if (focusNode.hasFocus) {
                     focusNode.unfocus();
                   }
+                  Navigator.pushNamed(context, RouteName.tradeListPage,
+                      arguments: {'gName': textEditingController.text ?? ""});
+
                 },
+                textInputAction: TextInputAction.search,
                 controller: textEditingController,
                 decoration: InputDecoration(
                     hintText: '搜点什么？', border: InputBorder.none),
