@@ -17,13 +17,13 @@ PODS:
   - FMDB/standard (2.7.5)
   - image_picker (0.0.1):
     - Flutter
-  - JCore (2.2.0)
-  - JVerification (2.5.3):
-    - JCore (< 3.0.0, >= 1.2.6)
+  - JCore (2.1.8)
+  - JVerification (2.6.0):
+    - JCore (< 3.0.0, >= 2.1.6)
   - jverify (0.0.1):
     - Flutter
-    - JCore
-    - JVerification
+    - JCore (~> 2.1.6)
+    - JVerification (~> 2.6.0)
   - multi_image_picker (4.6.4):
     - BSImagePicker (~> 2.10.3)
     - Flutter
@@ -85,14 +85,14 @@ SPEC CHECKSUMS:
   flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
-  JCore: dd8877f3adea559b60afdb0c77a8fa771c03b649
-  JVerification: 0d0b4474a250f19ef2bc45da7bd0d0e151350012
-  jverify: 39f3e355cdb0d7c03fd2f8497ea11b273339547f
+  JCore: a7f1dead960d77a97717c73ea8b0aa5b33706491
+  JVerification: c2b96de0379b9e6f9ec2f91f2ba5fc9499ddc203
+  jverify: b7e7417c622468c2fcf7483c3a2bb82f1ef5a9b2
   multi_image_picker: 1651732277b2db3b09e83f3be8eb7ea65cf2a933
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
 
-PODFILE CHECKSUM: 474313b5a4798cc74babb44e36bdf3bbbea9a318
+PODFILE CHECKSUM: e45c292f618eeca3034958d33b444b6e1249b55f
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1
