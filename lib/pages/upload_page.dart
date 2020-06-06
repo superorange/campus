@@ -38,7 +38,7 @@ class _UploadPageState extends State<UploadPage> {
   bool net = true;
   int mainPicIndex = 0;
   List<bool> showMainHint = List.generate(9, (_) => true);
-  StreamSubscription _netSubscription;
+
   ConnectivityResult _connectivityResult;
   void resetMainHint() {
     showMainHint = List.generate(9, (_) => true);
@@ -83,9 +83,6 @@ class _UploadPageState extends State<UploadPage> {
   @override
   void initState() {
     showMainHint.first = false;
-    _netSubscription = Connectivity().onConnectivityChanged.listen((r) {
-      _connectivityResult = r;
-    }, cancelOnError: true);
     super.initState();
   }
 
@@ -100,7 +97,7 @@ class _UploadPageState extends State<UploadPage> {
     if (_gDecFocus.hasFocus) {
       _gDecFocus.unfocus();
     }
-    _netSubscription.cancel();
+
     super.dispose();
   }
 
@@ -494,6 +491,7 @@ class _UploadPageState extends State<UploadPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(7)),
               onPressed: () async {
+
                 var _price;
                 if (!(l1 || l2 || l3 || l4)) {
                   showToast(AppText.chooseCategory, position: ToastPosition.bottom);
@@ -517,12 +515,13 @@ class _UploadPageState extends State<UploadPage> {
                   showToast(AppText.tooSmallPic);
                   return;
                 }
+                _connectivityResult=await Connectivity().checkConnectivity();
                 if (_connectivityResult == ConnectivityResult.none) {
                   showToast(AppText.netError1);
                   return;
                 }
-                print(_connectivityResult);
-                if (_connectivityResult != ConnectivityResult.mobile) {
+                print('_connectivityResult：${_connectivityResult}');
+                if (_connectivityResult == ConnectivityResult.mobile) {
                   showDialog(
                       context: context,
                       barrierDismissible: false,

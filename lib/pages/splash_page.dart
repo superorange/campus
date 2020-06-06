@@ -8,7 +8,6 @@ import 'package:flutter_app/config/app_text/app_text.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/utils/global_config.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hive/hive.dart';
 import 'package:lottie/lottie.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -81,7 +80,7 @@ start()async{
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334, allowFontScaling: true)..init(context);
+    ScreenUtil.init(context,width: 750, height: 1334);
     return Material(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

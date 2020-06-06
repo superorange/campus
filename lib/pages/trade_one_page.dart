@@ -466,7 +466,7 @@ class _TradeOnePageState extends State<TradeOnePage> {
                                                      child:  CircleAvatar(
                                                        backgroundImage:
                                                        CachedNetworkImageProvider(
-                                                           f.headPic),
+                                                           secondData[index].headPic),
                                                      ),
                                                      onTap: (){
                                                        Navigator.pushNamed(context, RouteName.userPage,arguments: secondData[index].userId);

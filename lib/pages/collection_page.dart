@@ -10,7 +10,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 class CollectionPage extends StatefulWidget {
-  String userId;
+  final String userId;
   CollectionPage(this.userId);
   @override
   _CollectionPageState createState() => _CollectionPageState();

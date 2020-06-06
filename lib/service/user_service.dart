@@ -61,6 +61,14 @@ class UserService extends BaseService {
       throw e;
     });
   }
+  Future<Response> getUserCollection() {
+    return dio.get(Api.userCollection+'/'+Api.userId).then((val) {
+      return val;
+    }, onError: (e) {
+      throw e;
+    });
+  }
+
   Future<Response> myGoods(String userId){
     return dio.get(Api.myGoods+'/$userId').then((val){
       return val;

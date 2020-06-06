@@ -12,6 +12,7 @@ class Api {
   static const chat = '/api/user/chat';
   static const imageKey = '/api/goods/imageskey';
   static const user = '/api/user';
+  static const userCollect = '/api/user/collect/';
   static const good = '/api/goods';
   static const goodsComment = '/api/comment/goods';
   static const userCollection = '/api/user/collect';
@@ -24,7 +25,7 @@ class Api {
   static const JLoginKEy='477d2dad7d19abe2ae0b42f6';
   static init() {
     if (Platform.isAndroid) {
-//      url = 'http:  10.0.2.2:100';
+      url = 'http:  10.0.2.2:100';
     }
 
   }

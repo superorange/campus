@@ -30,6 +30,7 @@ class _IndexPageState extends State<IndexPage> {
     PersonPage(),
   ];
   int _currentIndex = 0;
+
   @override
   void initState() {
     Provider.of<ChatChattersPageVm>(context, listen: false).init();
@@ -58,6 +59,7 @@ class _IndexPageState extends State<IndexPage> {
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold));
+      Provider.of<PersonPageVm>(context,listen: false).clearUser();
       }
     });
     super.initState();
@@ -65,7 +67,6 @@ class _IndexPageState extends State<IndexPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       body: PageView(
@@ -73,10 +74,11 @@ class _IndexPageState extends State<IndexPage> {
         controller: _pageController,
         children: _body,
       ),
-      bottomNavigationBar: Consumer<PersonPageVm>(builder: (context, vm, _) {
+      bottomNavigationBar: Consumer2<PersonPageVm, ChatChattersPageVm>(
+          builder: (context, vm, chatVm, _) {
         return BottomNavigationBar(
             onTap: (index) {
-              if((index==1||index==2)&&Api.token.isEmpty){
+              if ((index == 1 || index == 2) && Api.token.isEmpty) {
                 Navigator.pushNamed(context, RouteName.login);
                 return;
               }
@@ -102,17 +104,23 @@ class _IndexPageState extends State<IndexPage> {
                       ),
                       Align(
                         alignment: Alignment(0.2, -0.9),
-                        child:  Provider.of<ChatChattersPageVm>(context).lastMsg.keys.length>0?CircleAvatar(
-                          radius: 8,
-                          child: Text(Provider.of<ChatChattersPageVm>(context).lastMsgLength.values.reduce((v,k)=>v+k).toString(),
-                          style: TextStyle(
-                            fontSize: 10
-                          ),),
-                          backgroundColor: Colors.red,
-                        ):SizedBox(),
+                        child: (chatVm.lastMsgLength?.keys?.length == null ||
+                                chatVm.lastMsgLength.keys.length <= 0)
+                            ? SizedBox()
+                            : CircleAvatar(
+                                radius: 8,
+                                child: Text(
+                                  chatVm.lastMsgLength.values
+                                      .reduce((v, k) => v + k)
+                                      .toString(),
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
                       )
                     ],
-                  ), title: Text(AppText.appMessage)),
+                  ),
+                  title: Text(AppText.appMessage)),
               BottomNavigationBarItem(
                   icon: Icon(Icons.person), title: Text(AppText.appPerson)),
             ]);

@@ -30,13 +30,13 @@ class _PersonPageState extends State<PersonPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     return MediaQuery.removePadding(
         context: context,
         removeTop: true,
         child: Scaffold(
           body: Consumer<PersonPageVm>(builder: (context, vm, _) {
             if (vm.user == null) {
-
               return InkWell(
               onTap: () {
               Navigator.pushNamed(context, RouteName.login);
@@ -271,7 +271,19 @@ class _PersonPageState extends State<PersonPage>
                             child: TABWidget(
                                 t: Text('${vm.user.collection}'),
                                 b: Text(
-                                  '收藏',
+                                  '我的收藏',
+                                  style: AppStyle.personPageStyle(),
+                                )),
+                          ),
+                          InkWell(
+                            onTap: (){
+                              Navigator.pushNamed(context, RouteName.userCollectPage,arguments: vm.user.userId);
+                              print('send:${vm.user.userId}');
+                            },
+                            child: TABWidget(
+                                t: Text('${vm.user.fans}'),
+                                b: Text(
+                                  '我的关注',
                                   style: AppStyle.personPageStyle(),
                                 )),
                           ),
@@ -355,34 +367,34 @@ class _PersonPageState extends State<PersonPage>
                               c: Icon(Icons.sort))),
                     ),
                     Divider(),
-                    InkWell(
-                      onTap: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return ModifyInformationWidget('修改手机号', '请输入新手机号',
-                                  minTextLength: 11,
-                                  maxTextLength: 11,
-                                  onCancel: () {
-                                Navigator.pop(context);
-                              }, onClick: (val) {
-                                vm.updateUser({'type': 'phone', 'phone': val});
-                                Navigator.pop(context);
-                              });
-                            });
-                      },
-                      child: Container(
-                          height: setHeight(60),
-                          padding: EdgeInsets.only(
-                              left: setWidth(25), right: setWidth(25)),
-                          width: double.infinity,
-                          child: InformationWidget(
-                              a: Text('修改手机号',
-                                  style: AppStyle.personPageInformationStyle()),
-                              b: Container(),
-                              c: Icon(Icons.phone))),
-                    ),
-                    Divider(),
+//                    InkWell(
+//                      onTap: () {
+//                        showDialog(
+//                            context: context,
+//                            builder: (context) {
+//                              return ModifyInformationWidget('修改手机号', '请输入新手机号',
+//                                  minTextLength: 11,
+//                                  maxTextLength: 11,
+//                                  onCancel: () {
+//                                Navigator.pop(context);
+//                              }, onClick: (val) {
+//                                vm.updateUser({'type': 'phone', 'phone': val});
+//                                Navigator.pop(context);
+//                              });
+//                            });
+//                      },
+//                      child: Container(
+//                          height: setHeight(60),
+//                          padding: EdgeInsets.only(
+//                              left: setWidth(25), right: setWidth(25)),
+//                          width: double.infinity,
+//                          child: InformationWidget(
+//                              a: Text('修改手机号',
+//                                  style: AppStyle.personPageInformationStyle()),
+//                              b: Container(),
+//                              c: Icon(Icons.phone))),
+//                    ),
+//                    Divider(),
                     InkWell(
                       onTap: () async {
 
@@ -488,7 +500,7 @@ class _PersonPageState extends State<PersonPage>
                                       child: Text('取消')),
                                   FlatButton(
                                       onPressed: () async {
-                                        await vm.clearUser(context);
+                                        await vm.clearUser(clear: true);
 
                                         Navigator.pop(context);
                                       },

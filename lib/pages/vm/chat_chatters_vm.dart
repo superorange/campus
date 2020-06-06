@@ -69,6 +69,9 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
               chatMapMsg[f.userId] = [];
             }
             chatMapMsg[f.userId].add(f);
+
+            lastMsg[f.userId]=f.msg;
+
           }
         });
         if(scrollController.hasClients){
@@ -131,6 +134,7 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
       webSocketUtils.chattingController.stream.listen((data) {
         print('chatting页面:$data');
         var model = ChatModel.fromJson(data);
+        print('code:${model.code}');
         if (model.code == 210) {
           //自己发的
           if (!chatMapMsg.containsKey(model.chatMsg.first.toId)) {
@@ -143,8 +147,10 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
               model.chatMsg.first.msg,
               model.chatMsg.first.sign);
         }
-        if (model.code == 220) {
+
+        else if (model.code == 220) {
           //收到的
+          print('收到消息');
           if (!chatMapMsg.containsKey(model.chatMsg.first.userId)) {
             chatMapMsg[model.chatMsg.first.userId] = [];
           }
@@ -156,10 +162,10 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
               model.chatMsg.first.sign);
           lastMsg[model.chatMsg.first.userId]=model.chatMsg.first.msg;
           try {
-
             if(!lastMsgLength.containsKey(model.chatMsg.first.userId)){
               lastMsgLength[model.chatMsg.first.userId]=0;
             }
+            print('id:${model.chatMsg.first.userId}');
             lastMsgLength[model.chatMsg.first.userId]=lastMsgLength[model.chatMsg.first.userId]+1;
           } catch (e) {
             debugPrint('lenth:${lastMsgLength[model.chatMsg.first.userId]}');
@@ -168,7 +174,7 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
 
         }
         //历史消息
-        if (model.code == 215) {
+        else if (model.code == 215) {
           model.chatMsg.forEach((f) {
             f.sign = 2;
             print('sign:${f.sign}');
@@ -214,5 +220,10 @@ class ChatChattersPageVm extends BaseVm with ChangeNotifier {
     webSocketUtils.getChatters();
     webSocketUtils.getHistoryMessage();
     return null;
+  }
+  @override
+  void notifyListeners() {
+
+    super.notifyListeners();
   }
 }

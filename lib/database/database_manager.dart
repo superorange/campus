@@ -42,19 +42,16 @@ class DataBaseManager {
       throw Exception(SqliteState.Failed);
     }
   }
-
   Future<int> insertChatter(
       String userId, String toId, String userName, String headPic) async {
     return await _dataBase.rawInsert(
         """INSERT INTO chatter_table(userId,toId,userName,headPic) VALUES("$userId", "$toId","$userName","$headPic")""");
   }
-
   Future<int> insertChatMsg(
       String userId, String toId, String msg, int sign) async {
     return await _dataBase.rawInsert(
         """INSERT INTO chatmsg_table(userId, toId,msg,sign) VALUES("$userId","$toId","$msg",$sign)""");
   }
-
   Future<List<ChatMsg>> getChatMsg() async {
     if (_dataBase.isOpen) {
       List<Map> list = await _dataBase.rawQuery('SELECT * FROM chatmsg_table');
@@ -63,7 +60,6 @@ class DataBaseManager {
     }
     return null;
   }
-
   Future<List<Chatters>> getChatters() async {
     if (_dataBase.isOpen) {
       List<Map> list = await _dataBase.rawQuery('SELECT * FROM chatter_table');
@@ -72,7 +68,6 @@ class DataBaseManager {
     }
     return null;
   }
-
   Future<int> clearChatterTable() async {
     if (_dataBase.isOpen) {
       var t = await _dataBase.delete('chatter_table');
@@ -80,7 +75,6 @@ class DataBaseManager {
     }
     return null;
   }
-
   Future<int> clearChatMsgTable() async {
     if (_dataBase.isOpen) {
       var t = await _dataBase.delete('chatmsg_table');
@@ -88,7 +82,6 @@ class DataBaseManager {
     }
     return null;
   }
-
   void dispose() async {
     await _dataBase.close();
   }

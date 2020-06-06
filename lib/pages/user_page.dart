@@ -12,13 +12,15 @@ import 'package:flutter_app/widget/loading_widget.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
-  String userId;
+  final String userId;
   UserPage(this.userId);
   @override
   _UserPageState createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
+
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(create: (_)=>UserPageVm(),
@@ -148,7 +150,7 @@ class _UserPageState extends State<UserPage> {
                                         child: Row(
                                           children: <Widget>[
                                             Flexible(
-                                              child: CircleHeadPic(f.headPic??''),
+                                              child: CircleHeadPic(vm.userModel.headPic??''),
                                               flex: 1,
                                             ),
                                             Flexible(
@@ -164,7 +166,7 @@ class _UserPageState extends State<UserPage> {
                                                       .center,
                                                   children: <Widget>[
                                                     Text(
-                                                      '${f.userName}',
+                                                      '${vm.userModel.userName}',
                                                       style: TextStyle(
                                                         color: Colors.black,
                                                       ),

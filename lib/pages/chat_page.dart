@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/model/chat_data_model.dart';
 import 'package:flutter_app/pages/vm/chat_chatters_vm.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
-import 'package:oktoast/oktoast.dart';
+import 'package:flutter_app/pages/vm/person_page_vm.dart';
+import 'package:flutter_app/routes/routes.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
@@ -21,10 +21,12 @@ class _ChatPageState extends State<ChatPage> {
   TextEditingController textEditingController = TextEditingController();
 
   ChatDataModel chatDataModel;
-  Widget imageHead;
+  Widget imageHead1;
+  Widget imageHead2;
   Connectivity _connectivity = Connectivity();
 
   int msgLength = 0;
+
   @override
   void initState() {
     _connectivity.onConnectivityChanged.listen((res) {
@@ -33,27 +35,44 @@ class _ChatPageState extends State<ChatPage> {
       }
     });
     chatDataModel = ChatDataModel.fromJson(widget.argus);
-    imageHead = CachedNetworkImage(
-      errorWidget: (context, s, _) => Container(
-        color: Colors.yellow,
-      ),
+    imageHead1 = CachedNetworkImage(
+      errorWidget: (context, s, _) =>
+          Container(
+            color: Colors.yellow,
+          ),
       imageUrl: chatDataModel.headPic,
+      fit: BoxFit.cover,
+    );
+    imageHead2 =CachedNetworkImage(
+      errorWidget: (context, s, _) =>
+          Container(
+            color: Colors.yellow,
+          ),
+      imageUrl: Provider.of<PersonPageVm>(context,listen: false).user.headPic,
       fit: BoxFit.cover,
     );
     print('toId:${chatDataModel.toId}');
     Provider.of<ChatChattersPageVm>(context, listen: false)
       ..setInitData(chatDataModel.toId)
       ..addChatter(chatDataModel.toId);
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      Provider.of<ChatChattersPageVm>(context, listen: false).scrollController.jumpTo( Provider.of<ChatChattersPageVm>(context, listen: false).scrollController.position.maxScrollExtent);
-      Provider.of<ChatChattersPageVm>(context, listen: false)..oldPosition=Provider.of<ChatChattersPageVm>(context, listen: false).scrollController.position.maxScrollExtent
-      ..lastMsgLength.remove(chatDataModel.toId)
-      ..lastMsg.remove(chatDataModel.toId);
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider
+          .of<ChatChattersPageVm>(context, listen: false)
+          .scrollController
+          .jumpTo(Provider
+          .of<ChatChattersPageVm>(context, listen: false)
+          .scrollController
+          .position
+          .maxScrollExtent);
+      Provider.of<ChatChattersPageVm>(context, listen: false)
+        ..oldPosition = Provider
+            .of<ChatChattersPageVm>(context, listen: false)
+            .scrollController
+            .position
+            .maxScrollExtent;
     });
     super.initState();
   }
-
 
 
   Widget chatPosition(bool b, String msg) {
@@ -62,13 +81,18 @@ class _ChatPageState extends State<ChatPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Container(
-            height: 40,
-            width: 50,
-            padding: EdgeInsets.only(right: 10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: imageHead,
+          InkWell(
+            onTap: (){
+              Navigator.pushNamed(context, RouteName.userPage,arguments: chatDataModel.toId);
+            },
+            child: Container(
+              height: 40,
+              width: 50,
+              padding: EdgeInsets.only(right: 10),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: imageHead1,
+              ),
             ),
           ),
           Expanded(
@@ -114,7 +138,7 @@ class _ChatPageState extends State<ChatPage> {
           padding: EdgeInsets.only(left: 10),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(3),
-            child: imageHead,
+            child: imageHead2,
           ),
         ),
       ],
@@ -124,14 +148,14 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(child: Scaffold(
-      appBar: AppBar(
-        title: Text('${chatDataModel.userName}'),
-        centerTitle: true,
-        elevation: 0.5,
-      ),
-      body: Consumer<ChatChattersPageVm>(builder: (context, vm, _) {
-        return Column(
+    return Consumer<ChatChattersPageVm>(builder: (context, vm, _) {
+      return WillPopScope(child: Scaffold(
+        appBar: AppBar(
+          title: Text('${chatDataModel.userName}'),
+          centerTitle: true,
+          elevation: 0.5,
+        ),
+        body: Column(
           children: <Widget>[
             Expanded(
                 child: ListView.builder(
@@ -157,7 +181,10 @@ class _ChatPageState extends State<ChatPage> {
                     })),
             SafeArea(child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 5, top: 5),
+              padding: const EdgeInsets.only(left: 20,
+                  right: 20,
+                  bottom: 5,
+                  top: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -173,15 +200,19 @@ class _ChatPageState extends State<ChatPage> {
                         maxWidth: 250,
                         minWidth: 200),
                     child: TextField(
-                      onTap: (){
-                        Future.delayed(Duration(milliseconds: 100)).then((_){
-                          vm. scrollController.jumpTo(vm.scrollController.position.maxScrollExtent,);
+                      onTap: () {
+                        Future.delayed(Duration(milliseconds: 100)).then((_) {
+                          vm.scrollController.jumpTo(
+                            vm.scrollController.position.maxScrollExtent,);
                         });
                       },
-                      onChanged: (_){
-                        if(vm.oldPosition!=vm.scrollController.position.maxScrollExtent){
-                          vm.oldPosition=vm.scrollController.position.maxScrollExtent;
-                          vm.scrollController.position.jumpTo(vm.scrollController.position.maxScrollExtent);
+                      onChanged: (_) {
+                        if (vm.oldPosition !=
+                            vm.scrollController.position.maxScrollExtent) {
+                          vm.oldPosition =
+                              vm.scrollController.position.maxScrollExtent;
+                          vm.scrollController.position.jumpTo(
+                              vm.scrollController.position.maxScrollExtent);
                         }
                       },
                       maxLines: null,
@@ -194,7 +225,7 @@ class _ChatPageState extends State<ChatPage> {
                   Padding(
                     padding: EdgeInsets.zero,
                     child: IconButton(
-                        icon: Icon(Icons.send,color: Colors.blue,),
+                        icon: Icon(Icons.send, color: Colors.blue,),
                         onPressed: () {
                           if (textEditingController.text.isNotEmpty) {
                             vm.sendMsg(textEditingController.text,
@@ -207,13 +238,17 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),),
           ],
-        );
-      }),
-    ), onWillPop: ()async{
-      Provider.of<ChatChattersPageVm>(context, listen: false)
-        ..lastMsgLength.remove(chatDataModel.toId)
-        ..lastMsg.remove(chatDataModel.toId);
-      return true;
+        ),
+      ), onWillPop: () async {
+        if(vm.lastMsgLength.containsKey(chatDataModel.toId)){
+          vm
+            ..lastMsgLength.remove(chatDataModel.toId)
+            ..notifyListeners();
+          print('chatDataModel.toId:${chatDataModel.toId}');
+        }
+
+        return true;
+      });
     });
   }
 }

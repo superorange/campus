@@ -11,6 +11,7 @@ import 'package:flutter_app/pages/trade_page.dart';
 import 'package:flutter_app/pages/trade_search_page.dart';
 import 'package:flutter_app/pages/upload_page.dart';
 import 'package:flutter_app/pages/upload_page_ok.dart';
+import 'package:flutter_app/pages/user_collect_page.dart';
 import 'package:flutter_app/pages/user_page.dart';
 import 'package:flutter_app/routes/page_route.dart';
 
@@ -27,6 +28,7 @@ class RouteName {
   static const splashPage = '/';
   static const myGoodsPage = '/myGoodsPage';
   static const collectionPage = '/collectionPage';
+  static const userCollectPage = '/userCollectPage';
 
   static const uploadPage = '/uploadPage';
   static const uploadPageOk = '/uploadPageOk';
@@ -59,6 +61,8 @@ class AppRoute {
         return DefaultRoute(child: TradeSearchPage(settings.arguments));
       case RouteName.tradeInformationPage:
         return DefaultRoute(child: TradeOnePage(settings.arguments));
+      case RouteName.userCollectPage:
+        return DefaultRoute(child: UserCollectPage());
       case RouteName.smsLogin:
         return DefaultRoute(child: SmsLogin());
       case RouteName.chatPage:

@@ -10,6 +10,7 @@ import 'package:flutter_app/pages/vm/chat_chatters_vm.dart';
 import 'package:flutter_app/service/goods_service.dart';
 import 'package:flutter_app/service/user_service.dart';
 import 'package:flutter_app/utils/base_utils.dart';
+import 'package:flutter_app/utils/global_config.dart';
 import 'package:hive/hive.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:oktoast/oktoast.dart';
@@ -71,10 +72,8 @@ class PersonPageVm extends BaseVm with ChangeNotifier {
           notifyListeners();
           return LoginState.LoginOk;
         }
-        UserDataBase().clear();
-        DataBaseManager().clearChatterTable();
-        DataBaseManager().clearChatMsgTable();
-        notifyListeners();
+        showToast('登录过期了，请重新登录');
+        clearUser(clear: false);
         return LoginState.LoginFailed;
       }, onError: (e) {
         notifyListeners();
@@ -87,12 +86,14 @@ class PersonPageVm extends BaseVm with ChangeNotifier {
     return LoginState.Other;
   }
 
-  Future clearUser(BuildContext context) async {
-    await DataBaseManager().clearChatMsgTable();
-    await DataBaseManager().clearChatterTable();
+  Future clearUser({bool clear=false}) async {
+   if(clear){
+     await DataBaseManager().clearChatMsgTable();
+     await DataBaseManager().clearChatterTable();
+   }
     Hive.box('user_data')..delete('user')..delete('token');
     Api.token='';Api.userId='';
-    Provider.of<ChatChattersPageVm>(context, listen: false).clearUser();
+    Provider.of<ChatChattersPageVm>(GlobalConfig.globalKey.currentState.context, listen: false).clearUser();
     _user = null;
     notifyListeners();
   }

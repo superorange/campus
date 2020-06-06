@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="classes2">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/build/connectivity/intermediates/runtime_library_classes/release/classes.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

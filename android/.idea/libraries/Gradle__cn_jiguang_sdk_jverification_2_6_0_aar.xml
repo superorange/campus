@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cn.jiguang.sdk:jverification:2.6.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/030fc78e0dd68f8c9d9e4424c026de8a/jverification-2.6.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/030fc78e0dd68f8c9d9e4424c026de8a/jverification-2.6.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/030fc78e0dd68f8c9d9e4424c026de8a/jverification-2.6.0/jars/libs/jverification-android-release-2.6.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

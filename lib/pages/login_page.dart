@@ -25,8 +25,10 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        image: DecorationImage(image: AssetImage('assets/images/login_background.jpg'),
-        fit: BoxFit.cover)
+        gradient: LinearGradient(colors: [
+          Colors.blue,
+          Colors.green
+        ],begin: Alignment.topCenter,end: Alignment.bottomCenter)
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -119,34 +121,34 @@ class ChooseLoginPanel extends StatelessWidget {
       margin: EdgeInsets.only(top: 80),
       child: Column(
         children: <Widget>[
-          FlatButton(
-            onPressed: () async {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (ctx) {
-                    fastLogin(ctx);
-                    return LoadingWidget(ctx);
-                  });
-            },
-            child: Container(
-              width: double.infinity,
-              height: 50,
-              alignment: Alignment.center,
-              child: Text(
-                '本机号码一键登录/注册',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17),
-              ),
-            ),
-            color: Colors.white70.withOpacity(0.2),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          SizedBox(
-            height: 30,
-          ),
+//          FlatButton(
+//            onPressed: () async {
+//              showDialog(
+//                  context: context,
+//                  barrierDismissible: false,
+//                  builder: (ctx) {
+//                    fastLogin(ctx);
+//                    return LoadingWidget(ctx);
+//                  });
+//            },
+//            child: Container(
+//              width: double.infinity,
+//              height: 50,
+//              alignment: Alignment.center,
+//              child: Text(
+//                '本机号码一键登录/注册',
+//                style: TextStyle(
+//                    color: Colors.black,
+//                    fontWeight: FontWeight.bold,
+//                    fontSize: 17),
+//              ),
+//            ),
+//            color: Colors.white70.withOpacity(0.2),
+//            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+//          ),
+//          SizedBox(
+//            height: 30,
+//          ),
           FlatButton(
             onPressed: () {
               Navigator.pushNamed(context, RouteName.smsLogin);

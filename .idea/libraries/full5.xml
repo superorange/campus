@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="full5">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/build/flutter_plugin_android_lifecycle/intermediates/full_jar/release/createFullJarRelease/full.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

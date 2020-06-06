@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/pages/vm/collection_page_vm.dart';
 import 'package:flutter_app/pages/vm/my_goods_page_vm.dart';
 import 'package:flutter_app/routes/routes.dart';
 import 'package:flutter_app/widget/loading_widget.dart';

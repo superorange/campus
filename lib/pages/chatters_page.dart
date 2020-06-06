@@ -119,9 +119,13 @@ class _ChattersPageState extends State<ChattersPage>
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    vm.lastMsg[vm.chatters[index].userId]==null?Container():Text('新消息：${vm.lastMsg[vm.chatters[index].userId]}',style:Theme.of(context).textTheme.caption.copyWith(
-                                        color: Colors.red
-                                    )),
+                                    Expanded(child: vm.lastMsg[vm.chatters[index].userId]==null?Container():
+                                    Align(
+                                      child: Text(vm.lastMsgLength[vm.chatters[index].userId]==null?'${vm.lastMsg[vm.chatters[index].userId]}':'新消息：${vm.lastMsg[vm.chatters[index].userId]}',style:Theme.of(context).textTheme.caption.copyWith(
+                                          color: vm.lastMsgLength[vm.chatters[index].userId]==null?Colors.grey[400]:Colors.red
+                                      ),maxLines: 1,overflow: TextOverflow.ellipsis,textAlign: TextAlign.center,),
+                                      alignment: Alignment.centerLeft,
+                                    ),),
                                   ],
                                 ),
                               ),

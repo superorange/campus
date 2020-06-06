@@ -18,12 +18,8 @@ class BaseService {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (res) {
         Log.pt(flag: res.method, msg: res.uri);
-        Log.pt(
-          flag: 'Header',
-          msg: res.headers,
-        );
+        Log.pt(flag: 'Header', msg: res.headers,);
         Log.pt(msg: res.queryParameters, flag: 'queryParameters');
-
         Log.pt(msg: res.data, flag: 'data');
       },
       onResponse: (res) {
